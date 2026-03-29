@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日物理 — Daily Physics</title>
+<meta name="description" content="一天一个物理问题，用好奇心丈量宇宙">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230a0e1a' stroke='%2378b4ff' stroke-width='1.5'/><circle cx='16' cy='16' r='3' fill='%2378b4ff'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+::selection{background:rgba(120,180,255,.3)}
+body{
+  font-family:'Noto Serif SC',Georgia,serif;
+  background:linear-gradient(170deg,#0a0e1a 0%,#111828 40%,#0d1420 100%);
+  color:#e8e6f0;min-height:100vh;
+  background-attachment:fixed;
+}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:#78b4ff;text-decoration:none}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(120,180,255,.12)}50%{box-shadow:0 0 44px rgba(120,180,255,.28)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes starFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.08)}}
+
+/* ── Layout ── */
+.wrap{max-width:720px;margin:0 auto;padding:0 20px 80px}
+header{display:flex;justify-content:space-between;align-items:center;padding:28px 0 24px;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap;gap:16px}
+.logo-row{display:flex;align-items:center;gap:14px}
+.logo-mark{animation:glow 4s ease-in-out infinite;line-height:0}
+.site-title{font-size:28px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,#78b4ff,#c4a0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.site-sub{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1.5px;margin-top:3px}
+
+/* ── Buttons ── */
+.btn{border:none;cursor:pointer;font-family:'Noto Serif SC',serif;transition:all .2s}
+.btn-compose{
+  background:linear-gradient(135deg,rgba(120,180,255,.14),rgba(196,160,255,.14));
+  border:1px solid rgba(120,180,255,.3);border-radius:10px;padding:10px 20px;
+  color:#78b4ff;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;
+}
+.btn-compose:hover{background:linear-gradient(135deg,rgba(120,180,255,.22),rgba(196,160,255,.22));transform:translateY(-1px)}
+.btn-back{background:none;border:none;color:rgba(120,180,255,.7);font-size:14px;cursor:pointer;padding:20px 0;display:block;font-family:'Noto Serif SC',serif}
+.btn-back:hover{color:#78b4ff}
+.btn-publish{
+  margin-top:24px;width:100%;padding:15px;
+  background:linear-gradient(135deg,rgba(120,180,255,.18),rgba(196,160,255,.18));
+  border:1px solid rgba(120,180,255,.3);border-radius:12px;
+  color:#78b4ff;font-size:16px;font-weight:700;cursor:pointer;
+}
+.btn-publish:hover:not(:disabled){background:linear-gradient(135deg,rgba(120,180,255,.28),rgba(196,160,255,.28))}
+.btn-publish:disabled{opacity:.35;cursor:default}
+.btn-like{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:10px 24px;color:rgba(255,255,255,.5);font-size:14px;cursor:pointer;
+}
+.btn-like.active{background:rgba(255,100,120,.1);border-color:rgba(255,100,120,.3);color:#ff6478}
+.btn-delete{
+  background:none;border:1px solid rgba(255,80,80,.15);border-radius:10px;
+  padding:10px 24px;color:rgba(255,80,80,.4);font-size:14px;cursor:pointer;
+}
+.btn-delete:hover{border-color:rgba(255,80,80,.35);color:rgba(255,80,80,.65)}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:22px 0}
+.stat{background:rgba(255,255,255,.03);border-radius:12px;padding:18px 12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.stat.done{border-color:rgba(100,220,160,.3);background:rgba(100,220,160,.04)}
+.stat.todo{border-color:rgba(252,200,80,.3);background:rgba(252,200,80,.04)}
+.stat-n{display:block;font-size:30px;font-weight:900;color:#78b4ff;margin-bottom:2px}
+.stat-l{font-size:11px;color:rgba(255,255,255,.4)}
+
+/* ── Search ── */
+.search-wrap{position:relative;margin-bottom:10px}
+.search-wrap svg{position:absolute;left:14px;top:13px;opacity:.35}
+.search-input{
+  width:100%;padding:11px 40px 11px 40px;font-size:14px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;color:#e8e6f0;outline:none;font-family:'Noto Serif SC',serif;
+}
+.search-input:focus{border-color:rgba(120,180,255,.4)}
+.search-clear{position:absolute;right:12px;top:8px;background:none;border:none;color:rgba(255,255,255,.35);font-size:20px;cursor:pointer}
+
+/* ── Cards ── */
+.card{
+  display:flex;align-items:stretch;gap:0;
+  background:rgba(255,255,255,.025);border-radius:14px;
+  border:1px solid rgba(255,255,255,.06);margin-bottom:12px;
+  cursor:pointer;transition:all .25s;overflow:hidden;
+  animation:fadeUp .5s ease both;
+}
+.card:hover{border-color:rgba(120,180,255,.2);background:rgba(255,255,255,.04);transform:translateY(-2px)}
+.card-date{
+  min-width:72px;padding:18px 12px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:rgba(120,180,255,.05);border-right:1px solid rgba(255,255,255,.04);
+}
+.cd-month{font-size:11px;color:rgba(120,180,255,.65);font-weight:500}
+.cd-day{font-size:28px;font-weight:900;color:#78b4ff;line-height:1.1}
+.cd-week{font-size:10px;color:rgba(255,255,255,.25);margin-top:2px}
+.card-body{flex:1;padding:16px 6px 16px 16px}
+.card-emoji{font-size:22px;margin-bottom:4px}
+.card-q{font-size:16px;font-weight:700;line-height:1.55;color:#f0eef8;margin-bottom:5px}
+.card-a{font-size:13px;color:rgba(255,255,255,.38);line-height:1.6}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{
+  font-size:11px;padding:3px 11px;border-radius:20px;
+  background:rgba(120,180,255,.08);color:rgba(120,180,255,.65);
+  border:1px solid rgba(120,180,255,.12);cursor:pointer;
+}
+.tag:hover{background:rgba(120,180,255,.16);color:#78b4ff}
+.card-arrow{display:flex;align-items:center;padding:0 16px;color:rgba(255,255,255,.12);font-size:22px}
+
+/* ── Detail ── */
+.detail{
+  margin:0;padding:36px 32px;
+  background:rgba(255,255,255,.03);border-radius:16px;
+  border:1px solid rgba(255,255,255,.08);animation:slideIn .4s ease;
+}
+.detail-date-row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.detail-emoji{font-size:40px;animation:starFloat 3s ease-in-out infinite}
+.detail-date{font-size:13px;color:rgba(255,255,255,.3)}
+.detail-q{font-size:26px;font-weight:900;line-height:1.55;margin-bottom:22px;color:#f5f3ff}
+.detail-div{height:1px;background:linear-gradient(90deg,rgba(120,180,255,.3),rgba(196,160,255,.3),transparent);margin-bottom:22px}
+.detail-a{font-size:16px;line-height:2.1;color:rgba(255,255,255,.68)}
+.detail-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px}
+.tag-lg{font-size:13px;padding:6px 16px;border-radius:20px;background:rgba(120,180,255,.1);color:rgba(120,180,255,.7);border:1px solid rgba(120,180,255,.18)}
+.detail-actions{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+
+/* ── Compose ── */
+.compose-card{
+  padding:30px 26px;background:rgba(255,255,255,.03);
+  border-radius:16px;border:1px solid rgba(255,255,255,.08);
+  animation:fadeUp .4s ease;
+}
+.compose-title{font-size:22px;font-weight:700;color:#c4a0ff;margin-bottom:4px}
+.date-badge{
+  display:inline-block;font-size:12px;padding:5px 16px;border-radius:20px;
+  background:rgba(120,180,255,.08);color:rgba(120,180,255,.65);margin-bottom:20px;
+}
+.field-label{display:block;font-size:13px;color:rgba(255,255,255,.4);margin:18px 0 8px}
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap}
+.emoji-btn{
+  width:42px;height:42px;border-radius:10px;font-size:20px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.emoji-btn.active{background:rgba(120,180,255,.15);border-color:rgba(120,180,255,.4);transform:scale(1.12)}
+textarea,input[type=text]{
+  width:100%;padding:12px 16px;font-size:15px;line-height:1.8;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;color:#e8e6f0;resize:vertical;outline:none;
+  font-family:'Noto Serif SC',serif;
+}
+textarea:focus,input[type=text]:focus{border-color:rgba(120,180,255,.45)}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  background:rgba(100,220,160,.92);color:#0a1a10;padding:11px 30px;
+  border-radius:22px;font-size:14px;font-weight:700;z-index:999;
+  animation:toastIn .3s ease;pointer-events:none;
+}
+/* ── Empty ── */
+.empty{text-align:center;padding:60px 20px}
+.empty-icon{font-size:52px;margin-bottom:14px}
+.empty-text{color:rgba(255,255,255,.4);font-size:15px}
+
+/* ── Footer ── */
+footer{text-align:center;padding:44px 20px 20px;font-size:12px;color:rgba(255,255,255,.18);letter-spacing:1.5px}
+
+/* ── Responsive ── */
+@media(max-width:500px){
+  .site-title{font-size:22px}
+  .detail{padding:24px 18px}
+  .detail-q{font-size:22px}
+  .stats{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .stat{padding:14px 8px}
+  .stat-n{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const STORAGE_KEY = "physics-blog-posts";
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WEEKDAYS = ["日","一","二","三","四","五","六"];
+const EMOJIS = ["🔬","⚡","🌍","🧲","💡","🌌","⭐","🤚","🔭","🧪","☀️","🌊"];
+
+const DEFAULT_POSTS = [
+  {id:"p1",date:"2026-03-27",question:"如果现在有一颗星星消失了熄灭了炸了，我们还能不能看到它？",answer:"能看到！光的速度是有限的，星光穿越了几百甚至几千光年才到达我们眼中。即使星星已经消失，它的光仍在路上。我们每晚仰望的星空，看到的其实是宇宙的「过去」。\n\n一颗距离我们1000光年的星星，它的光需要1000年才能到达地球。如果它今天爆炸了，我们要等到1000年后才能「看到」它消失。在这之前，它在我们眼中依然闪亮如初。",tags:["天文学","光速","超新星"],emoji:"⭐",liked:false},
+  {id:"p2",date:"2026-03-28",question:"你摸到一个东西的时候，真的碰到它了吗？",answer:"从未真正碰到！原子之间的电子云产生电磁排斥力，让原子永远无法真正接触。你感受到的「触感」其实是电磁力的推力。\n\n你一生中从未真正接触过任何东西。手指和杯子之间永远有约0.1纳米的间隙——一根头发的百万分之一。这个间隙充满了电磁排斥力，正是这股力量让你感觉到「碰到了」。所有的触感，都是原子间那道看不见的电磁墙。",tags:["量子力学","电磁力","原子"],emoji:"🤚",liked:false}
+];
+
+let state = { posts: [], view: "home", selectedId: null, showCompose: false, search: "", newQ: "", newA: "", newTags: "", newEmoji: "🔬" };
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state.posts = raw ? JSON.parse(raw) : [...DEFAULT_POSTS];
+  } catch { state.posts = [...DEFAULT_POSTS]; }
+  if (!state.posts.length) state.posts = [...DEFAULT_POSTS];
+  save();
+}
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.posts)); } catch {} }
+
+function todayStr() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function fmtDate(s) {
+  const d=new Date(s+"T00:00:00");
+  return { month:MONTHS[d.getMonth()], day:d.getDate(), weekday:`星期${WEEKDAYS[d.getDay()]}`, full:`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日` };
+}
+function streak() {
+  let c=0, d=new Date();
+  for(let i=0;i<365;i++){
+    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    if(state.posts.some(p=>p.date===ds)){c++;d.setDate(d.getDate()-1)} else break;
+  }
+  return c;
+}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function nl2br(s){return esc(s).replace(/\n/g,"<br>")}
+
+function toast(msg) {
+  const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const today = todayStr();
+  const todayPost = state.posts.find(p=>p.date===today);
+  const filtered = state.search ? state.posts.filter(p=> p.question.includes(state.search)||p.answer.includes(state.search)||p.tags.some(t=>t.includes(state.search))) : state.posts;
+
+  if (state.view==="home" && !state.showCompose) {
+    app.innerHTML = `
+      <header>
+        <div class="logo-row">
+          <div class="logo-mark">
+            <svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="rgba(120,180,255,.55)" stroke-width="1.5"/><circle cx="16" cy="16" r="3" fill="rgba(120,180,255,.8)"/><ellipse cx="16" cy="16" rx="10" ry="4" fill="none" stroke="rgba(120,180,255,.25)" stroke-width="1" transform="rotate(-30 16 16)"/><ellipse cx="16" cy="16" rx="10" ry="4" fill="none" stroke="rgba(120,180,255,.25)" stroke-width="1" transform="rotate(30 16 16)"/></svg>
+          </div>
+          <div>
+            <div class="site-title">每日物理</div>
+            <div class="site-sub mono">一天一个物理问题 / Daily Physics</div>
+          </div>
+        </div>
+        <button class="btn btn-compose" onclick="showCompose()"><span style="font-size:18px">+</span> 发布今日问题</button>
+      </header>
+
+      <div class="stats">
+        <div class="stat"><span class="stat-n">${state.posts.length}</span><span class="stat-l mono">问题总数</span></div>
+        <div class="stat"><span class="stat-n">${streak()}</span><span class="stat-l mono">连续天数</span></div>
+        <div class="stat ${todayPost?"done":"todo"}"><span class="stat-n">${todayPost?"✓":"?"}</span><span class="stat-l mono">${todayPost?"今日已发":"今日待发"}</span></div>
+      </div>
+
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input class="search-input mono" placeholder="搜索问题、标签..." value="${esc(state.search)}" oninput="updateSearch(this.value)">
+        ${state.search?`<button class="search-clear" onclick="clearSearch()">×</button>`:""}
+      </div>
+
+      <div class="timeline">
+        ${filtered.length===0?`<div class="empty"><div class="empty-icon">🔭</div><p class="empty-text">还没有内容，发布你的第一个物理问题吧！</p></div>`:
+          filtered.map((p,i)=>{
+            const dt=fmtDate(p.date);
+            return `<div class="card" style="animation-delay:${i*0.07}s" onclick="openPost('${p.id}')">
+              <div class="card-date">
+                <div class="cd-month mono">${dt.month}</div>
+                <div class="cd-day">${dt.day}</div>
+                <div class="cd-week">${dt.weekday}</div>
+              </div>
+              <div class="card-body">
+                <div class="card-emoji">${p.emoji}</div>
+                <div class="card-q">${esc(p.question)}</div>
+                <div class="card-a">${esc(p.answer.replace(/\n/g," ")).slice(0,80)}...</div>
+                <div class="card-tags">${p.tags.map(t=>`<span class="tag" onclick="event.stopPropagation();searchTag('${esc(t)}')">${esc(t)}</span>`).join("")}</div>
+              </div>
+              <div class="card-arrow">→</div>
+            </div>`;
+          }).join("")
+        }
+      </div>
+      <footer class="mono">每日物理 — 用好奇心丈量宇宙</footer>
+    `;
+  }
+
+  else if (state.showCompose) {
+    const dt = fmtDate(today);
+    app.innerHTML = `
+      <button class="btn-back" onclick="hideCompose()">← 返回</button>
+      <div class="compose-title">发布今日物理问题</div>
+      <div class="compose-card">
+        <div class="date-badge mono">${dt.full}</div>
+        <label class="field-label">选个图标</label>
+        <div class="emoji-row">
+          ${EMOJIS.map(e=>`<button class="emoji-btn ${state.newEmoji===e?"active":""}" onclick="pickEmoji('${e}')">${e}</button>`).join("")}
+        </div>
+        <label class="field-label">今日问题</label>
+        <textarea rows="3" placeholder="比如：为什么天空是蓝色的？" oninput="state.newQ=this.value">${esc(state.newQ)}</textarea>
+        <label class="field-label">答案 / 解释</label>
+        <textarea rows="6" style="min-height:140px" placeholder="写下你的科普解答..." oninput="state.newA=this.value">${esc(state.newA)}</textarea>
+        <label class="field-label">标签（逗号分隔）</label>
+        <input type="text" placeholder="例：光学, 折射, 大气" value="${esc(state.newTags)}" oninput="state.newTags=this.value">
+        <button class="btn btn-publish" onclick="publish()" ${(!state.newQ.trim()||!state.newA.trim())?"disabled":""}>发布问题</button>
+      </div>
+    `;
+  }
+
+  else if (state.view==="detail") {
+    const p = state.posts.find(x=>x.id===state.selectedId);
+    if(!p){state.view="home";render();return;}
+    const dt=fmtDate(p.date);
+    app.innerHTML = `
+      <button class="btn-back" onclick="goHome()">← 返回列表</button>
+      <article class="detail">
+        <div class="detail-date-row">
+          <span class="detail-emoji">${p.emoji}</span>
+          <span class="detail-date mono">${dt.full}</span>
+        </div>
+        <h2 class="detail-q">${esc(p.question)}</h2>
+        <div class="detail-div"></div>
+        <div class="detail-a">${nl2br(p.answer)}</div>
+        <div class="detail-tags">${p.tags.map(t=>`<span class="tag-lg mono">${esc(t)}</span>`).join("")}</div>
+        <div class="detail-actions">
+          <button class="btn btn-like ${p.liked?"active":""}" onclick="toggleLike('${p.id}')">${p.liked?"♥ 已收藏":"♡ 收藏"}</button>
+          <button class="btn btn-delete" onclick="if(confirm('确定删除这条问题吗？'))deletePost('${p.id}')">删除此条</button>
+        </div>
+      </article>
+      <footer class="mono">每日物理 — 用好奇心丈量宇宙</footer>
+    `;
+  }
+}
+
+/* ── Actions ── */
+function showCompose(){state.showCompose=true;render();window.scrollTo(0,0)}
+function hideCompose(){state.showCompose=false;render()}
+function goHome(){state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
+function openPost(id){state.view="detail";state.selectedId=id;render();window.scrollTo(0,0)}
+function updateSearch(v){state.search=v;render()}
+function clearSearch(){state.search="";render()}
+function searchTag(t){state.search=t;state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
+function pickEmoji(e){state.newEmoji=e;render()}
+
+function publish(){
+  if(!state.newQ.trim()||!state.newA.trim())return;
+  state.posts.unshift({
+    id:"p"+Date.now(), date:todayStr(), question:state.newQ.trim(), answer:state.newA.trim(),
+    tags:state.newTags.split(/[,，、\s]+/).filter(Boolean), emoji:state.newEmoji||"🔬", liked:false
+  });
+  save();
+  state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;
+  render(); toast("发布成功！");
+}
+function toggleLike(id){
+  const p=state.posts.find(x=>x.id===id);if(p)p.liked=!p.liked;save();render();
+}
+function deletePost(id){
+  state.posts=state.posts.filter(x=>x.id!==id);save();goHome();toast("已删除");
+}
+
+/* ── Init ── */
+load();
+render();
+</script>
+</body>
+</html>
