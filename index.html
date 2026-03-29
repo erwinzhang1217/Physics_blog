@@ -179,7 +179,12 @@ footer{text-align:center;padding:44px 20px 20px;font-size:12px;color:rgba(255,25
   .stat{padding:14px 8px}
   .stat-n{font-size:24px}
 }
+/* ── Sync hint ── */
+.sync-hint{font-size:12px;color:rgba(120,180,255,.5);text-align:center;padding:8px 12px;margin-bottom:8px;border:1px solid rgba(120,180,255,.12);border-radius:10px;background:rgba(120,180,255,.04)}
 </style>
+<!-- Firebase compat SDK (Realtime Database) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -187,6 +192,24 @@ footer{text-align:center;padding:44px 20px 20px;font-size:12px;color:rgba(255,25
 
 <script>
 const STORAGE_KEY = "physics-blog-posts";
+/** Realtime Database document path (single object: { items: [...], updatedAt }) */
+const RTDB_PATH = "physics_blog_posts";
+
+/**
+ * Paste your Firebase web app config here after creating a Realtime Database.
+ * See FIREBASE_SETUP.md. Leave apiKey as REPLACE_ME to use localStorage only.
+ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDj29-P7LI2NYofKGjSq6ckhRjuxUNeuJw",
+  authDomain: "physicsblog-b5a0e.firebaseapp.com",
+  databaseURL: "https://physicsblog-b5a0e-default-rtdb.firebaseio.com",
+  projectId: "physicsblog-b5a0e",
+  storageBucket: "physicsblog-b5a0e.firebasestorage.app",
+  messagingSenderId: "738143028403",
+  appId: "1:738143028403:web:3a6f63dda318ead61cdcc6",
+  measurementId: "G-TXP2TZCRW9",
+};
+
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const WEEKDAYS = ["日","一","二","三","四","五","六"];
 const EMOJIS = ["🔬","⚡","🌍","🧲","💡","🌌","⭐","🤚","🔭","🧪","☀️","🌊"];
@@ -196,17 +219,117 @@ const DEFAULT_POSTS = [
   {id:"p2",date:"2026-03-28",question:"你摸到一个东西的时候，真的碰到它了吗？",answer:"从未真正碰到！原子之间的电子云产生电磁排斥力，让原子永远无法真正接触。你感受到的「触感」其实是电磁力的推力。\n\n你一生中从未真正接触过任何东西。手指和杯子之间永远有约0.1纳米的间隙——一根头发的百万分之一。这个间隙充满了电磁排斥力，正是这股力量让你感觉到「碰到了」。所有的触感，都是原子间那道看不见的电磁墙。",tags:["量子力学","电磁力","原子"],emoji:"🤚",liked:false}
 ];
 
-let state = { posts: [], view: "home", selectedId: null, showCompose: false, search: "", newQ: "", newA: "", newTags: "", newEmoji: "🔬" };
+let state = { posts: [], view: "home", selectedId: null, showCompose: false, search: "", newQ: "", newA: "", newTags: "", newEmoji: "🔬", useCloud: false, cloudSyncing: false };
 
-function load() {
+let postsRef = null;
+
+function isFirebaseConfigured() {
+  const c = FIREBASE_CONFIG;
+  return !!(
+    c.apiKey &&
+    c.apiKey !== "REPLACE_ME" &&
+    c.databaseURL &&
+    !String(c.databaseURL).includes("REPLACE_ME")
+  );
+}
+
+/** Firebase may return arrays as objects with numeric keys */
+function normalizePosts(val) {
+  if (val == null) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === "object") {
+    return Object.keys(val)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((i) => val[i])
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function cacheToLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.posts)); } catch (_) {}
+}
+
+function loadFromCache() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length) state.posts = parsed;
+  } catch (_) {}
+}
+
+function loadLegacyLocalOnly() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     state.posts = raw ? JSON.parse(raw) : [...DEFAULT_POSTS];
-  } catch { state.posts = [...DEFAULT_POSTS]; }
+  } catch (_) { state.posts = [...DEFAULT_POSTS]; }
   if (!state.posts.length) state.posts = [...DEFAULT_POSTS];
-  save();
 }
-function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.posts)); } catch {} }
+
+function save() {
+  cacheToLocal();
+  if (state.useCloud && postsRef) {
+    state.cloudSyncing = true;
+    postsRef.set({ items: state.posts, updatedAt: Date.now() }, (err) => {
+      state.cloudSyncing = false;
+      if (err) {
+        console.error(err);
+        toast("云端保存失败，已写入本机缓存");
+      }
+      render();
+    });
+  }
+}
+
+function bootstrapData() {
+  if (!isFirebaseConfigured() || typeof firebase === "undefined") {
+    loadLegacyLocalOnly();
+    state.useCloud = false;
+    render();
+    return;
+  }
+
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    postsRef = firebase.database().ref(RTDB_PATH);
+    state.useCloud = true;
+    loadFromCache();
+    render();
+
+    postsRef.on(
+      "value",
+      (snap) => {
+        const data = snap.val();
+        if (data === null) {
+          postsRef.set({ items: [...DEFAULT_POSTS], updatedAt: Date.now() });
+          return;
+        }
+        if (data.items === undefined || data.items === null) {
+          postsRef.set({ items: [...DEFAULT_POSTS], updatedAt: Date.now() });
+          return;
+        }
+        const items = normalizePosts(data.items);
+        state.posts = items;
+        cacheToLocal();
+        render();
+      },
+      (err) => {
+        console.error(err);
+        toast("无法连接云端，使用本地数据");
+        if (!state.posts.length) loadLegacyLocalOnly();
+        state.useCloud = false;
+        render();
+      }
+    );
+  } catch (e) {
+    console.error(e);
+    toast("Firebase 初始化失败");
+    loadLegacyLocalOnly();
+    state.useCloud = false;
+    render();
+  }
+}
 
 function todayStr() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function fmtDate(s) {
@@ -249,6 +372,7 @@ function render() {
         </div>
         <button class="btn btn-compose" onclick="showCompose()"><span style="font-size:18px">+</span> 发布今日问题</button>
       </header>
+      ${state.useCloud?`<div class="sync-hint mono">${state.cloudSyncing?"正在同步到云端…":"已连接云端 · 所有设备实时同步"}</div>`:""}
 
       <div class="stats">
         <div class="stat"><span class="stat-n">${state.posts.length}</span><span class="stat-l mono">问题总数</span></div>
@@ -375,8 +499,7 @@ function deletePost(id){
 }
 
 /* ── Init ── */
-load();
-render();
+bootstrapData();
 </script>
 </body>
 </html>
