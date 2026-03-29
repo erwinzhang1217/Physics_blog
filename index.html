@@ -299,12 +299,12 @@ function render() {
           ${EMOJIS.map(e=>`<button class="emoji-btn ${state.newEmoji===e?"active":""}" onclick="pickEmoji('${e}')">${e}</button>`).join("")}
         </div>
         <label class="field-label">今日问题</label>
-        <textarea rows="3" placeholder="比如：为什么天空是蓝色的？" oninput="state.newQ=this.value">${esc(state.newQ)}</textarea>
+        <textarea id="compQ" rows="3" placeholder="比如：为什么天空是蓝色的？" oninput="state.newQ=this.value;updatePublishBtn()">${esc(state.newQ)}</textarea>
         <label class="field-label">答案 / 解释</label>
-        <textarea rows="6" style="min-height:140px" placeholder="写下你的科普解答..." oninput="state.newA=this.value">${esc(state.newA)}</textarea>
+        <textarea id="compA" rows="6" style="min-height:140px" placeholder="写下你的科普解答..." oninput="state.newA=this.value;updatePublishBtn()">${esc(state.newA)}</textarea>
         <label class="field-label">标签（逗号分隔）</label>
         <input type="text" placeholder="例：光学, 折射, 大气" value="${esc(state.newTags)}" oninput="state.newTags=this.value">
-        <button class="btn btn-publish" onclick="publish()" ${(!state.newQ.trim()||!state.newA.trim())?"disabled":""}>发布问题</button>
+        <button class="btn btn-publish" id="publishBtn" onclick="publish()" disabled>发布问题</button>
       </div>
     `;
   }
@@ -342,9 +342,22 @@ function openPost(id){state.view="detail";state.selectedId=id;render();window.sc
 function updateSearch(v){state.search=v;render()}
 function clearSearch(){state.search="";render()}
 function searchTag(t){state.search=t;state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
-function pickEmoji(e){state.newEmoji=e;render()}
+function pickEmoji(e){
+  state.newEmoji=e;
+  document.querySelectorAll('.emoji-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.textContent.trim()===e);
+  });
+}
+function updatePublishBtn(){
+  const btn=document.getElementById("publishBtn");
+  if(btn) btn.disabled = (!state.newQ.trim()||!state.newA.trim());
+}
 
 function publish(){
+  const qEl=document.getElementById("compQ");
+  const aEl=document.getElementById("compA");
+  if(qEl) state.newQ=qEl.value;
+  if(aEl) state.newA=aEl.value;
   if(!state.newQ.trim()||!state.newA.trim())return;
   state.posts.unshift({
     id:"p"+Date.now(), date:todayStr(), question:state.newQ.trim(), answer:state.newA.trim(),
