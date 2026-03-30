@@ -185,6 +185,7 @@ footer{text-align:center;padding:44px 20px 20px;font-size:12px;color:rgba(255,25
 <!-- Firebase compat SDK (Realtime Database) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
 </head>
 <body>
 
@@ -292,6 +293,7 @@ function bootstrapData() {
 
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
+    if (typeof firebase.analytics === "function") firebase.analytics();
     postsRef = firebase.database().ref(RTDB_PATH);
     state.useCloud = true;
     loadFromCache();
@@ -350,6 +352,14 @@ function nl2br(s){return esc(s).replace(/\n/g,"<br>")}
 function toast(msg) {
   const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
   document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
+}
+
+function logAnalytics(eventName, params) {
+  try {
+    if (typeof firebase !== "undefined" && typeof firebase.analytics === "function") {
+      firebase.analytics().logEvent(eventName, params || {});
+    }
+  } catch (_) {}
 }
 
 function render() {
@@ -462,8 +472,8 @@ function render() {
 function showCompose(){state.showCompose=true;render();window.scrollTo(0,0)}
 function hideCompose(){state.showCompose=false;render()}
 function goHome(){state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
-function openPost(id){state.view="detail";state.selectedId=id;render();window.scrollTo(0,0)}
-function updateSearch(v){state.search=v;render()}
+function openPost(id){state.view="detail";state.selectedId=id;render();window.scrollTo(0,0);logAnalytics("open_post",{id})}
+function updateSearch(v){state.search=v;render();if(v&&v.length>=2)logAnalytics("search",{keyword_length:v.length})}
 function clearSearch(){state.search="";render()}
 function searchTag(t){state.search=t;state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
 function pickEmoji(e){
@@ -487,15 +497,16 @@ function publish(){
     id:"p"+Date.now(), date:todayStr(), question:state.newQ.trim(), answer:state.newA.trim(),
     tags:state.newTags.split(/[,，、\s]+/).filter(Boolean), emoji:state.newEmoji||"🔬", liked:false
   });
+  logAnalytics("publish_question", { has_tags: !!state.newTags.trim(), question_length: state.newQ.trim().length });
   save();
   state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;
   render(); toast("发布成功！");
 }
 function toggleLike(id){
-  const p=state.posts.find(x=>x.id===id);if(p)p.liked=!p.liked;save();render();
+  const p=state.posts.find(x=>x.id===id);if(p)p.liked=!p.liked;save();render();logAnalytics("toggle_like",{id});
 }
 function deletePost(id){
-  state.posts=state.posts.filter(x=>x.id!==id);save();goHome();toast("已删除");
+  state.posts=state.posts.filter(x=>x.id!==id);save();goHome();toast("已删除");logAnalytics("delete_post",{id});
 }
 
 /* ── Init ── */
