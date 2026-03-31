@@ -62,6 +62,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:28p
   padding:10px 24px;color:rgba(255,80,80,.4);font-size:14px;cursor:pointer;
 }
 .btn-delete:hover{border-color:rgba(255,80,80,.35);color:rgba(255,80,80,.65)}
+.btn-edit{
+  background:rgba(255,255,255,.04);border:1px solid rgba(196,160,255,.2);border-radius:10px;
+  padding:10px 24px;color:rgba(196,160,255,.65);font-size:14px;cursor:pointer;
+}
+.btn-edit:hover{border-color:rgba(196,160,255,.45);color:#c4a0ff}
 
 /* ── Stats ── */
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:22px 0}
@@ -220,7 +225,7 @@ const DEFAULT_POSTS = [
   {id:"p2",date:"2026-03-28",question:"你摸到一个东西的时候，真的碰到它了吗？",answer:"从未真正碰到！原子之间的电子云产生电磁排斥力，让原子永远无法真正接触。你感受到的「触感」其实是电磁力的推力。\n\n你一生中从未真正接触过任何东西。手指和杯子之间永远有约0.1纳米的间隙——一根头发的百万分之一。这个间隙充满了电磁排斥力，正是这股力量让你感觉到「碰到了」。所有的触感，都是原子间那道看不见的电磁墙。",tags:["量子力学","电磁力","原子"],emoji:"🤚",liked:false}
 ];
 
-let state = { posts: [], view: "home", selectedId: null, showCompose: false, search: "", newQ: "", newA: "", newTags: "", newEmoji: "🔬", useCloud: false, cloudSyncing: false };
+let state = { posts: [], view: "home", selectedId: null, showCompose: false, editId: null, search: "", newQ: "", newA: "", newTags: "", newEmoji: "🔬", useCloud: false, cloudSyncing: false };
 
 let postsRef = null;
 
@@ -422,10 +427,12 @@ function render() {
   }
 
   else if (state.showCompose) {
-    const dt = fmtDate(today);
+    const isEdit = !!state.editId;
+    const editPost = isEdit ? state.posts.find(x=>x.id===state.editId) : null;
+    const dt = fmtDate(isEdit ? editPost.date : today);
     app.innerHTML = `
       <button class="btn-back" onclick="hideCompose()">← 返回</button>
-      <div class="compose-title">发布今日物理问题</div>
+      <div class="compose-title">${isEdit ? "编辑问题" : "发布今日物理问题"}</div>
       <div class="compose-card">
         <div class="date-badge mono">${dt.full}</div>
         <label class="field-label">选个图标</label>
@@ -438,9 +445,10 @@ function render() {
         <textarea id="compA" rows="6" style="min-height:140px" placeholder="写下你的科普解答..." oninput="state.newA=this.value;updatePublishBtn()">${esc(state.newA)}</textarea>
         <label class="field-label">标签（逗号分隔）</label>
         <input type="text" placeholder="例：光学, 折射, 大气" value="${esc(state.newTags)}" oninput="state.newTags=this.value">
-        <button class="btn btn-publish" id="publishBtn" onclick="publish()" disabled>发布问题</button>
+        <button class="btn btn-publish" id="publishBtn" onclick="publish()">${isEdit ? "保存修改" : "发布问题"}</button>
       </div>
     `;
+    updatePublishBtn();
   }
 
   else if (state.view==="detail") {
@@ -460,6 +468,7 @@ function render() {
         <div class="detail-tags">${p.tags.map(t=>`<span class="tag-lg mono">${esc(t)}</span>`).join("")}</div>
         <div class="detail-actions">
           <button class="btn btn-like ${p.liked?"active":""}" onclick="toggleLike('${p.id}')">${p.liked?"♥ 已收藏":"♡ 收藏"}</button>
+          <button class="btn btn-edit" onclick="editPost('${p.id}')">✏ 编辑</button>
           <button class="btn btn-delete" onclick="if(confirm('确定删除这条问题吗？'))deletePost('${p.id}')">删除此条</button>
         </div>
       </article>
@@ -469,8 +478,17 @@ function render() {
 }
 
 /* ── Actions ── */
-function showCompose(){state.showCompose=true;render();window.scrollTo(0,0)}
-function hideCompose(){state.showCompose=false;render()}
+function showCompose(){state.showCompose=true;state.editId=null;render();window.scrollTo(0,0)}
+function hideCompose(){
+  state.showCompose=false;
+  if(state.editId){state.view="detail";state.editId=null;}
+  render();
+}
+function editPost(id){
+  const p=state.posts.find(x=>x.id===id);if(!p)return;
+  state.newQ=p.question;state.newA=p.answer;state.newTags=p.tags.join("，");state.newEmoji=p.emoji;
+  state.editId=id;state.showCompose=true;render();window.scrollTo(0,0);
+}
 function goHome(){state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
 function openPost(id){state.view="detail";state.selectedId=id;render();window.scrollTo(0,0);logAnalytics("open_post",{id})}
 function updateSearch(v){state.search=v;render();if(v&&v.length>=2)logAnalytics("search",{keyword_length:v.length})}
@@ -493,14 +511,28 @@ function publish(){
   if(qEl) state.newQ=qEl.value;
   if(aEl) state.newA=aEl.value;
   if(!state.newQ.trim()||!state.newA.trim())return;
-  state.posts.unshift({
-    id:"p"+Date.now(), date:todayStr(), question:state.newQ.trim(), answer:state.newA.trim(),
-    tags:state.newTags.split(/[,，、\s]+/).filter(Boolean), emoji:state.newEmoji||"🔬", liked:false
-  });
-  logAnalytics("publish_question", { has_tags: !!state.newTags.trim(), question_length: state.newQ.trim().length });
-  save();
-  state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;
-  render(); toast("发布成功！");
+  if(state.editId){
+    const p=state.posts.find(x=>x.id===state.editId);
+    if(p){
+      p.question=state.newQ.trim();p.answer=state.newA.trim();
+      p.tags=state.newTags.split(/[,，、\s]+/).filter(Boolean);p.emoji=state.newEmoji||p.emoji;
+    }
+    logAnalytics("edit_question",{id:state.editId});
+    save();
+    const editedId=state.editId;
+    state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;state.editId=null;
+    state.view="detail";state.selectedId=editedId;
+    render();toast("已保存修改！");
+  } else {
+    state.posts.unshift({
+      id:"p"+Date.now(), date:todayStr(), question:state.newQ.trim(), answer:state.newA.trim(),
+      tags:state.newTags.split(/[,，、\s]+/).filter(Boolean), emoji:state.newEmoji||"🔬", liked:false
+    });
+    logAnalytics("publish_question", { has_tags: !!state.newTags.trim(), question_length: state.newQ.trim().length });
+    save();
+    state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;
+    render();toast("发布成功！");
+  }
 }
 function toggleLike(id){
   const p=state.posts.find(x=>x.id===id);if(p)p.liked=!p.liked;save();render();logAnalytics("toggle_like",{id});
