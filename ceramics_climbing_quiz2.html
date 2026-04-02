@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陶瓷 & 攀岩 物理判断题</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+                 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 620px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 0.35rem;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+  }
+
+  .prog-dot {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: #ddd;
+    transition: background 0.3s;
+  }
+  .prog-dot.done    { background: #1D9E75; }
+  .prog-dot.current { background: #378ADD; }
+
+  .q-card {
+    background: #fff;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .q-meta {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .q-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+    color: #1a1a1a;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-tf {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-tf:hover:not(:disabled) { background: #f5f4f0; }
+  .btn-tf:disabled { cursor: default; }
+  .btn-tf.correct { background: #EAF3DE; border-color: #3B6D11; color: #27500A; }
+  .btn-tf.wrong   { background: #FCEBEB; border-color: #A32D2D; color: #791F1F; }
+  .btn-tf.dimmed  { opacity: 0.32; }
+
+  .reveal-row {
+    margin-top: 1rem;
+    display: none;
+  }
+  .reveal-row.visible { display: flex; align-items: center; gap: 10px; }
+
+  .reveal-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 20px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .reveal-btn:hover { background: #f5f4f0; border-color: #aaa; }
+  .reveal-btn.revealed { background: #f0f0ee; color: #888; border-color: #ddd; cursor: default; }
+
+  .result-badge {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .result-badge.ok  { background: #EAF3DE; color: #27500A; }
+  .result-badge.bad { background: #FCEBEB; color: #791F1F; }
+
+  .explain {
+    margin-top: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: #f8f8f6;
+    border-left: 3px solid #378ADD;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.65;
+    display: none;
+  }
+  .explain.visible { display: block; }
+
+  .next-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: none;
+  }
+  .next-btn.visible { display: block; }
+  .next-btn:hover { background: #f5f4f0; }
+
+  .score-card {
+    background: #fff;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+  .score-num   { font-size: 52px; font-weight: 500; color: #1a1a1a; }
+  .score-sub   { font-size: 13px; color: #aaa; margin-bottom: 0.5rem; }
+  .score-breakdown {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  .pill {
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+  }
+  .pill-ceramic { background: #FAEEDA; color: #633806; }
+  .pill-climb   { background: #E1F5EE; color: #085041; }
+  .score-msg  { font-size: 15px; color: #555; line-height: 1.6; margin: 1rem 0 1.5rem; }
+  .restart-btn {
+    padding: 10px 32px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+  }
+  .restart-btn:hover { background: #f5f4f0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>陶瓷 &amp; 攀岩 — 物理判断题</h1>
+  <p class="subtitle">陶瓷 7 题 · 攀岩 3 题 · 第二组</p>
+  <div class="progress" id="progress"></div>
+  <div id="quiz-area"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    topic: '陶瓷',
+    text: '同一块陶土，拉成薄壁器皿比做成厚壁器皿更容易在烧制中变形，是因为薄壁导热更快、温差更大。',
+    answer: false,
+    explain: '错。薄壁更容易变形，但原因是结构强度不足——在高温软化阶段，薄壁器皿自身重力就足以让其塌陷变形，而不是因为导热更快造成温差更大。事实上薄壁导热反而更均匀，热应力更小。'
+  },
+  {
+    topic: '陶瓷',
+    text: '还原焰烧制（窑内缺氧）会让含铁釉呈现红色或黄色，氧化焰（富氧）则呈现青色或灰绿色。',
+    answer: false,
+    explain: '错，恰好相反。还原焰让铁离子从 Fe³⁺ 还原为 Fe²⁺，呈现青色、灰绿色（如龙泉青瓷）；氧化焰保留 Fe³⁺，呈现红色、黄褐色。这是中国传统窑变控制色彩的核心原理。'
+  },
+  {
+    topic: '陶瓷',
+    text: '釉料在高温下会熔化成液态，冷却后形成玻璃质，所以釉面本质上是一层玻璃。',
+    answer: true,
+    explain: '对。釉料主要成分是硅酸盐，高温熔融后冷却形成非晶态固体，与玻璃的形成机理完全相同。这也是为什么釉面具有玻璃的光泽、透明度和不透水性，而无釉陶器则多孔且能透水。'
+  },
+  {
+    topic: '陶瓷',
+    text: '陶土含水量越高，可塑性越好，所以做复杂造型时应该尽量多加水。',
+    answer: false,
+    explain: '错。水分过多会让陶土失去支撑力，器壁无法保持形状，容易塌陷。可塑性最佳的含水量有一个"甜蜜区间"（通常20–30%），过多或过少都会降低成形性。过湿的土干燥时也会因收缩不均匀而开裂。'
+  },
+  {
+    topic: '陶瓷',
+    text: '陶器和瓷器的根本区别在于使用的原料不同——陶用陶土，瓷用高岭土。',
+    answer: false,
+    explain: '错。原料只是部分原因，更根本的区别是烧成温度和致密度：陶器烧成温度低（900°C以下），气孔多、吸水率高；瓷器烧成温度高（1200°C以上），坯体完全玻化、不吸水。有些瓷器也可用普通陶土，关键在于烧结程度。'
+  },
+  {
+    topic: '陶瓷',
+    text: '坯体在干燥过程中会收缩，主要是因为水分蒸发后，黏土颗粒之间的距离缩小、靠得更近。',
+    answer: true,
+    explain: '对。湿坯中，水膜撑开黏土颗粒之间的间距；干燥时水分蒸发，颗粒间毛细张力将其拉近，宏观上就表现为收缩。收缩率通常为5–15%，不均匀干燥（如表面比内部干得快）会导致裂纹。'
+  },
+  {
+    topic: '陶瓷',
+    text: '在拉坯机上，坯体旋转产生的离心力有助于将土向外甩，是拉坯成形的主要动力。',
+    answer: false,
+    explain: '错。离心力在拉坯中是需要克服的阻力，而非动力。成形的主要动力是手对陶土施加的挤压力和摩擦力——手指内外夹持土壁，通过向上提拉和向内收压来控制形状。转速过快反而会让土失控甩飞。'
+  },
+  {
+    topic: '攀岩',
+    text: '攀岩中"死点"技术是指：在跳跃抓点的过程中，身体在最高点瞬间处于"失重"状态，此时抓握所需的力气最小。',
+    answer: true,
+    explain: '对。向上跳跃的最高点，竖直速度为零、加速度向下，身体处于类似失重的瞬间——手对岩点的抓握只需克服水平方向的分力，不需要抵抗向下的重力分量。利用这个瞬间出手，可以大幅降低抓点所需的力量。'
+  },
+  {
+    topic: '攀岩',
+    text: '在悬垂路线（负角度岩壁）上，手臂弯曲比伸直挂着更省力，因为弯曲能让肌肉更有效地发力。',
+    answer: false,
+    explain: '错。挂直臂（手臂伸直）才更省力。直臂时重力沿骨骼传递，肌肉几乎不需要持续收缩；弯曲手臂则需要肱二头肌持续等长收缩来对抗重力，非常耗力。长时间悬挂应尽量保持直臂，是攀岩省力的基本原则。'
+  },
+  {
+    topic: '攀岩',
+    text: '摩擦力脚法（Smearing）的原理是：用鞋底大面积接触光滑岩面，靠橡胶与岩石之间的静摩擦力支撑体重。',
+    answer: true,
+    explain: '对。Smearing 就是在没有明显脚点的光滑岩面上，将鞋底尽量大面积平贴岩壁，增大正压力和接触面积，从而获得足够的静摩擦力承重。重心要压向岩壁、脚跟放低，让鞋底与岩面之间的摩擦力最大化。'
+  },
+];
+
+let current = 0, score = 0, ceramicScore = 0, climbScore = 0, answered = false;
+
+function renderProgress() {
+  document.getElementById('progress').innerHTML = questions.map((q, i) => {
+    let cls = 'prog-dot';
+    if (i < current) cls += ' done';
+    else if (i === current) cls += ' current';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  const topicColor = q.topic === '陶瓷' ? '#854F0B' : '#0F6E56';
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="q-card">
+      <div class="q-meta" style="color:${topicColor}">
+        ${q.topic} &nbsp;·&nbsp;
+        <span style="color:#aaa;font-weight:400;">${current + 1} / ${questions.length}</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="btn-row">
+        <button class="btn-tf" id="btn-true"  onclick="answer(true)">正确</button>
+        <button class="btn-tf" id="btn-false" onclick="answer(false)">错误</button>
+      </div>
+      <div class="reveal-row" id="reveal-row">
+        <button class="reveal-btn" id="reveal-btn" onclick="toggleExplain()">查看解析</button>
+        <span class="result-badge" id="result-badge"></span>
+      </div>
+      <div class="explain" id="explain-area"></div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="next()">
+      ${current < questions.length - 1 ? '下一题 →' : '查看结果'}
+    </button>
+  `;
+  renderProgress();
+}
+
+function answer(userAnswer) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const correct = userAnswer === q.answer;
+  if (correct) {
+    score++;
+    if (q.topic === '陶瓷') ceramicScore++; else climbScore++;
+  }
+
+  const btnTrue  = document.getElementById('btn-true');
+  const btnFalse = document.getElementById('btn-false');
+  [btnTrue, btnFalse].forEach(btn => btn.disabled = true);
+
+  if (q.answer === true)  btnTrue.classList.add('correct');
+  else                    btnFalse.classList.add('correct');
+
+  if (!correct) {
+    if (userAnswer === true)  btnTrue.classList.add('wrong');
+    else                      btnFalse.classList.add('wrong');
+  }
+
+  const oppBtn = userAnswer === true ? btnFalse : btnTrue;
+  if (!oppBtn.classList.contains('correct')) oppBtn.classList.add('dimmed');
+
+  const badge = document.getElementById('result-badge');
+  badge.textContent = correct ? '答对了！' : '答错了。';
+  badge.className = 'result-badge ' + (correct ? 'ok' : 'bad');
+
+  const explainEl = document.getElementById('explain-area');
+  explainEl.textContent = q.explain;
+
+  document.getElementById('reveal-row').classList.add('visible');
+  document.getElementById('next-btn').classList.add('visible');
+}
+
+function toggleExplain() {
+  const explainEl = document.getElementById('explain-area');
+  const btn = document.getElementById('reveal-btn');
+  const isVisible = explainEl.classList.contains('visible');
+  if (isVisible) {
+    explainEl.classList.remove('visible');
+    btn.textContent = '查看解析';
+    btn.classList.remove('revealed');
+  } else {
+    explainEl.classList.add('visible');
+    btn.textContent = '收起解析';
+    btn.classList.add('revealed');
+  }
+}
+
+function next() {
+  current++;
+  if (current >= questions.length) showScore();
+  else renderQuestion();
+}
+
+function showScore() {
+  const pct = Math.round(score / questions.length * 100);
+  const msgs = [
+    [100, '满分！釉面工艺和岩点力学都难不倒你。'],
+    [80,  '很扎实，偶有盲区，继续烧窑爬岩会更清楚。'],
+    [60,  '还不错，有几个反直觉的地方值得回头看看。'],
+    [0,   '很多反直觉的知识点——这正是物理好玩的地方！'],
+  ];
+  const msg = msgs.find(([t]) => pct >= t)[1];
+  document.getElementById('progress').innerHTML = '';
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="score-card">
+      <div class="score-num">${score} / ${questions.length}</div>
+      <div class="score-sub">答对 ${pct}%</div>
+      <div class="score-breakdown">
+        <span class="pill pill-ceramic">陶瓷 ${ceramicScore} / 7</span>
+        <span class="pill pill-climb">攀岩 ${climbScore} / 3</span>
+      </div>
+      <div class="score-msg">${msg}</div>
+      <button class="restart-btn" onclick="restart()">再来一次</button>
+    </div>
+  `;
+}
+
+function restart() {
+  current = 0; score = 0; ceramicScore = 0; climbScore = 0;
+  renderProgress(); renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
