@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陶瓷 & 攀岩 物理判断题</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+                 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 620px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 0.35rem;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+  }
+
+  .prog-dot {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: #ddd;
+    transition: background 0.3s;
+  }
+  .prog-dot.done    { background: #1D9E75; }
+  .prog-dot.current { background: #378ADD; }
+
+  .q-card {
+    background: #fff;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .q-meta {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .q-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+    color: #1a1a1a;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-tf {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-tf:hover:not(:disabled) { background: #f5f4f0; }
+  .btn-tf:disabled { cursor: default; }
+  .btn-tf.correct { background: #EAF3DE; border-color: #3B6D11; color: #27500A; }
+  .btn-tf.wrong   { background: #FCEBEB; border-color: #A32D2D; color: #791F1F; }
+  .btn-tf.dimmed  { opacity: 0.32; }
+
+  .reveal-row {
+    margin-top: 1rem;
+    display: none;
+  }
+  .reveal-row.visible { display: flex; align-items: center; gap: 10px; }
+
+  .reveal-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 20px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .reveal-btn:hover { background: #f5f4f0; border-color: #aaa; }
+  .reveal-btn.revealed { background: #f0f0ee; color: #888; border-color: #ddd; cursor: default; }
+
+  .result-badge {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .result-badge.ok  { background: #EAF3DE; color: #27500A; }
+  .result-badge.bad { background: #FCEBEB; color: #791F1F; }
+
+  .explain {
+    margin-top: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: #f8f8f6;
+    border-left: 3px solid #378ADD;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.65;
+    display: none;
+  }
+  .explain.visible { display: block; }
+
+  .next-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: none;
+  }
+  .next-btn.visible { display: block; }
+  .next-btn:hover { background: #f5f4f0; }
+
+  .score-card {
+    background: #fff;
+    border: 0.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+  .score-num   { font-size: 52px; font-weight: 500; color: #1a1a1a; }
+  .score-sub   { font-size: 13px; color: #aaa; margin-bottom: 0.5rem; }
+  .score-breakdown {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  .pill {
+    font-size: 12px;
+    padding: 4px 14px;
+    border-radius: 20px;
+  }
+  .pill-ceramic { background: #FAEEDA; color: #633806; }
+  .pill-climb   { background: #E1F5EE; color: #085041; }
+  .score-msg  { font-size: 15px; color: #555; line-height: 1.6; margin: 1rem 0 1.5rem; }
+  .restart-btn {
+    padding: 10px 32px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+  }
+  .restart-btn:hover { background: #f5f4f0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>陶瓷 &amp; 攀岩 — 物理判断题</h1>
+  <p class="subtitle">陶瓷 3 题 · 做饭 2 题 · 第三组</p>
+  <div class="progress" id="progress"></div>
+  <div id="quiz-area"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    topic: '陶瓷',
+    text: '拉坯时陶土顺时针旋转，手向上提拉时应该稍微向外施力，这样才能让器壁均匀变薄。',
+    answer: false,
+    explain: '错。提拉时内外手应该同时向上并轻微向内收，保持内外压力平衡才能让器壁均匀变薄。一味向外施力会让器壁越来越宽、越来越薄直至塌陷；正确的手法是内手撑、外手引导，合力方向几乎竖直向上。'
+  },
+  {
+    topic: '陶瓷',
+    text: '同一个釉料配方，窑内气氛（氧化还是还原）不同，最终烧出的颜色可能完全不同。',
+    answer: true,
+    explain: '对。釉中的金属氧化物在不同气氛下价态发生变化。铁在氧化焰下以 Fe³⁺ 存在，呈红棕色；还原焰下变为 Fe²⁺，呈青灰色。同理铜在氧化焰下呈绿色，还原焰下呈红色（铜红釉）。窑变的美就来自气氛的细微变化。'
+  },
+  {
+    topic: '陶瓷',
+    text: '陶瓷器皿比玻璃杯更耐热冲击（比如倒入滚烫的液体），是因为陶瓷的导热系数更高。',
+    answer: false,
+    explain: '错，刚好相反。陶瓷导热系数比玻璃低，加热时温差更不均匀，理论上热冲击更大。陶瓷耐热冲击更好，真正的原因是其热膨胀系数较小、以及微观上的气孔和晶界能吸收并分散裂纹扩展，阻止整体断裂。'
+  },
+  {
+    topic: '做饭',
+    text: '焯蔬菜时加一撮盐，能让水的沸点升高，让蔬菜熟得更快。',
+    answer: false,
+    explain: '错。加盐确实能升高沸点（沸点升高是稀溶液的依数性），但家庭烹饪用量的盐只能让沸点升高约0.1–0.2°C，这点温差对烹饪速度几乎没有影响。焯蔬菜加盐真正的作用是：调味、帮助保持蔬菜绿色（影响叶绿素稳定性），以及轻微改善口感，而不是"让水更烫"。'
+  },
+  {
+    topic: '做饭',
+    text: '用铸铁锅煎牛排比用薄不锈钢锅效果更好，主要是因为铸铁导热更快、能更迅速传热给食材。',
+    answer: false,
+    explain: "错。铸铁的导热系数其实比不锈钢低，传热速度更慢。铸铁煎牛排效果好，真正的原因是它的热容量极大——厚重的铸铁储存了大量热能，放入冷牛排后温度几乎不下降，能持续维持高温产生美拉德反应；薄锅则会瞬间降温、变成炖而非煎。"
+  },
+];
+
+let current = 0, score = 0, ceramicScore = 0, climbScore = 0, cookScore = 0, answered = false;
+
+function renderProgress() {
+  document.getElementById('progress').innerHTML = questions.map((q, i) => {
+    let cls = 'prog-dot';
+    if (i < current) cls += ' done';
+    else if (i === current) cls += ' current';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  const topicColor = q.topic === '陶瓷' ? '#854F0B' : q.topic === '攀岩' ? '#0F6E56' : '#185FA5';
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="q-card">
+      <div class="q-meta" style="color:${topicColor}">
+        ${q.topic} &nbsp;·&nbsp;
+        <span style="color:#aaa;font-weight:400;">${current + 1} / ${questions.length}</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="btn-row">
+        <button class="btn-tf" id="btn-true"  onclick="answer(true)">正确</button>
+        <button class="btn-tf" id="btn-false" onclick="answer(false)">错误</button>
+      </div>
+      <div class="reveal-row" id="reveal-row">
+        <span class="result-badge" id="result-badge"></span>
+      </div>
+      <div class="explain" id="explain-area"></div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="next()">
+      ${current < questions.length - 1 ? '下一题 →' : '查看结果'}
+    </button>
+  `;
+  renderProgress();
+}
+
+function answer(userAnswer) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const correct = userAnswer === q.answer;
+  if (correct) {
+    score++;
+    if (q.topic === '陶瓷') ceramicScore++;
+    else if (q.topic === '攀岩') climbScore++;
+    else cookScore++;
+  }
+
+  const btnTrue  = document.getElementById('btn-true');
+  const btnFalse = document.getElementById('btn-false');
+  [btnTrue, btnFalse].forEach(btn => btn.disabled = true);
+
+  if (q.answer === true)  btnTrue.classList.add('correct');
+  else                    btnFalse.classList.add('correct');
+
+  if (!correct) {
+    if (userAnswer === true)  btnTrue.classList.add('wrong');
+    else                      btnFalse.classList.add('wrong');
+  }
+
+  const oppBtn = userAnswer === true ? btnFalse : btnTrue;
+  if (!oppBtn.classList.contains('correct')) oppBtn.classList.add('dimmed');
+
+  const badge = document.getElementById('result-badge');
+  badge.textContent = correct ? '答对了！' : '答错了。';
+  badge.className = 'result-badge ' + (correct ? 'ok' : 'bad');
+
+  const explainEl = document.getElementById('explain-area');
+  explainEl.textContent = q.explain;
+
+  document.getElementById('reveal-row').classList.add('visible');
+  document.getElementById('next-btn').classList.add('visible');
+}
+
+function next() {
+  current++;
+  if (current >= questions.length) showScore();
+  else renderQuestion();
+}
+
+function showScore() {
+  const pct = Math.round(score / questions.length * 100);
+  const msgs = [
+    [100, '满分！釉面工艺和岩点力学都难不倒你。'],
+    [80,  '很扎实，偶有盲区，继续烧窑爬岩会更清楚。'],
+    [60,  '还不错，有几个反直觉的地方值得回头看看。'],
+    [0,   '很多反直觉的知识点——这正是物理好玩的地方！'],
+  ];
+  const msg = msgs.find(([t]) => pct >= t)[1];
+  document.getElementById('progress').innerHTML = '';
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="score-card">
+      <div class="score-num">${score} / ${questions.length}</div>
+      <div class="score-sub">答对 ${pct}%</div>
+      <div class="score-breakdown">
+        <span class="pill pill-ceramic">陶瓷 ${ceramicScore} / 3</span>
+        
+        <span class="pill" style="background:#E6F1FB;color:#0C447C;">做饭 ${cookScore} / 2</span>
+      </div>
+      <div class="score-msg">${msg}</div>
+      <button class="restart-btn" onclick="restart()">再来一次</button>
+    </div>
+  `;
+}
+
+function restart() {
+  current = 0; score = 0; ceramicScore = 0; climbScore = 0; cookScore = 0;
+  renderProgress(); renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
