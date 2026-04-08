@@ -177,7 +177,7 @@
     border-radius: 20px;
   }
   .pill-ceramic { background: #FAEEDA; color: #633806; }
-  .pill-climb   { background: #E1F5EE; color: #085041; }
+  .pill-cook    { background: #E6F1FB; color: #0C447C; }
   .score-msg  { font-size: 15px; color: #555; line-height: 1.6; margin: 1rem 0 1.5rem; }
   .restart-btn {
     padding: 10px 32px;
@@ -234,7 +234,7 @@ const questions = [
   },
 ];
 
-let current = 0, score = 0, ceramicScore = 0, climbScore = 0, cookScore = 0, answered = false;
+let current = 0, score = 0, ceramicScore = 0, cookScore = 0, answered = false;
 
 function renderProgress() {
   document.getElementById('progress').innerHTML = questions.map((q, i) => {
@@ -261,6 +261,7 @@ function renderQuestion() {
         <button class="btn-tf" id="btn-false" onclick="answer(false)">错误</button>
       </div>
       <div class="reveal-row" id="reveal-row">
+        <button class="reveal-btn" id="reveal-btn" onclick="toggleExplain()">查看解析</button>
         <span class="result-badge" id="result-badge"></span>
       </div>
       <div class="explain" id="explain-area"></div>
@@ -280,7 +281,6 @@ function answer(userAnswer) {
   if (correct) {
     score++;
     if (q.topic === '陶瓷') ceramicScore++;
-    else if (q.topic === '攀岩') climbScore++;
     else cookScore++;
   }
 
@@ -310,6 +310,21 @@ function answer(userAnswer) {
   document.getElementById('next-btn').classList.add('visible');
 }
 
+function toggleExplain() {
+  const explainEl = document.getElementById('explain-area');
+  const btn = document.getElementById('reveal-btn');
+  const isVisible = explainEl.classList.contains('visible');
+  if (isVisible) {
+    explainEl.classList.remove('visible');
+    btn.textContent = '查看解析';
+    btn.classList.remove('revealed');
+  } else {
+    explainEl.classList.add('visible');
+    btn.textContent = '收起解析';
+    btn.classList.add('revealed');
+  }
+}
+
 function next() {
   current++;
   if (current >= questions.length) showScore();
@@ -319,7 +334,7 @@ function next() {
 function showScore() {
   const pct = Math.round(score / questions.length * 100);
   const msgs = [
-    [100, '满分！釉面工艺和做饭都难不倒你。'],
+    [100, '满分！陶瓷工艺和厨房物理都难不倒你。'],
     [80,  '很扎实，偶有盲区，继续烧窑做饭会更清楚。'],
     [60,  '还不错，有几个反直觉的地方值得回头看看。'],
     [0,   '很多反直觉的知识点——这正是物理好玩的地方！'],
@@ -332,8 +347,7 @@ function showScore() {
       <div class="score-sub">答对 ${pct}%</div>
       <div class="score-breakdown">
         <span class="pill pill-ceramic">陶瓷 ${ceramicScore} / 3</span>
-        
-        <span class="pill" style="background:#E6F1FB;color:#0C447C;">做饭 ${cookScore} / 2</span>
+        <span class="pill pill-cook">做饭 ${cookScore} / 2</span>
       </div>
       <div class="score-msg">${msg}</div>
       <button class="restart-btn" onclick="restart()">再来一次</button>
@@ -342,7 +356,7 @@ function showScore() {
 }
 
 function restart() {
-  current = 0; score = 0; ceramicScore = 0; climbScore = 0; cookScore = 0;
+  current = 0; score = 0; ceramicScore = 0; cookScore = 0;
   renderProgress(); renderQuestion();
 }
 
