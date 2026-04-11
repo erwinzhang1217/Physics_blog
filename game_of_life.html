@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conway's Game of Life</title>
+<style>
+  :root{
+    --bg:#f5f4f0;
+    --ink:#1a1a1a;
+    --muted:#6b6b6b;
+    --line:#d9d6cf;
+    --accent:#2a6f4e;
+    --cell:#1a1a1a;
+    --cell-young:#2a6f4e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:20px;margin:0 0 4px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:14px;line-height:1.55}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  button{font:inherit;font-size:13px;padding:7px 12px;border-radius:10px;
+    border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);
+    transition:background .15s,transform .05s}
+  button:hover{background:#f0efe9}
+  button:active{transform:translateY(1px)}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button.primary:hover{background:#235b40}
+  select{font:inherit;font-size:13px;padding:7px 10px;border-radius:10px;
+    border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .stats{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .speed{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  input[type=range]{width:110px}
+  canvas{display:block;width:100%;height:auto;background:#faf9f5;
+    border:1px solid var(--line);border-radius:10px;cursor:crosshair;touch-action:none}
+  .legend{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6}
+  .legend b{color:var(--ink)}
+  kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#f0efe9;
+    border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Conway's Game of Life · 生命游戏</h1>
+  <div class="sub">
+    细胞的生死只有四条规则：孤单 (&lt;2 邻居) 或拥挤 (&gt;3 邻居) 会死，恰好 3 个邻居会诞生，2–3 个邻居维持存活。
+    点击格子画图案，或选择一个预设，然后按「开始」。
+  </div>
+
+  <div class="panel">
+    <div class="controls">
+      <button id="playBtn" class="primary">▶ 开始</button>
+      <button id="stepBtn">下一步</button>
+      <button id="clearBtn">清空</button>
+      <button id="randomBtn">随机</button>
+      <select id="preset">
+        <option value="">— 预设图案 —</option>
+        <option value="glider">滑翔机 Glider</option>
+        <option value="blinker">闪烁器 Blinker</option>
+        <option value="toad">蟾蜍 Toad</option>
+        <option value="beacon">灯塔 Beacon</option>
+        <option value="pulsar">脉冲星 Pulsar</option>
+        <option value="gun">滑翔机枪 Gosper Gun</option>
+      </select>
+      <div class="speed">
+        速度 <input type="range" id="speed" min="1" max="30" value="10">
+      </div>
+      <div class="stats">
+        代 <span id="gen">0</span> · 活 <span id="pop">0</span>
+      </div>
+    </div>
+    <canvas id="cv"></canvas>
+    <div class="legend">
+      <b>玩法</b>：点击/拖动格子切换细胞 · <kbd>空格</kbd> 开始/暂停 · <kbd>N</kbd> 下一步 · <kbd>C</kbd> 清空 · <kbd>R</kbd> 随机
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const COLS = 60, ROWS = 40;
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  let CELL = 12;
+
+  function resize(){
+    const w = cv.parentElement.clientWidth - 2;
+    CELL = Math.max(6, Math.floor(w / COLS));
+    cv.width  = COLS * CELL;
+    cv.height = ROWS * CELL;
+    cv.style.width = cv.width + 'px';
+    cv.style.height = cv.height + 'px';
+    draw();
+  }
+
+  let grid = make(), next = make(), age = make();
+  let gen = 0, playing = false, timer = null, speed = 10;
+
+  function make(){ return new Uint8Array(COLS * ROWS); }
+  const idx = (x,y) => y * COLS + x;
+
+  function step(){
+    let pop = 0;
+    for (let y=0; y<ROWS; y++){
+      for (let x=0; x<COLS; x++){
+        let n = 0;
+        for (let dy=-1; dy<=1; dy++){
+          for (let dx=-1; dx<=1; dx++){
+            if (!dx && !dy) continue;
+            const xx = (x+dx+COLS) % COLS;
+            const yy = (y+dy+ROWS) % ROWS;
+            n += grid[idx(xx,yy)];
+          }
+        }
+        const alive = grid[idx(x,y)];
+        const born = !alive && n === 3;
+        const live = alive && (n === 2 || n === 3);
+        next[idx(x,y)] = (born || live) ? 1 : 0;
+        if (next[idx(x,y)]){
+          age[idx(x,y)] = alive ? Math.min(255, age[idx(x,y)]+1) : 1;
+          pop++;
+        } else {
+          age[idx(x,y)] = 0;
+        }
+      }
+    }
+    [grid, next] = [next, grid];
+    gen++;
+    document.getElementById('gen').textContent = gen;
+    document.getElementById('pop').textContent = pop;
+    draw();
+  }
+
+  function draw(){
+    ctx.fillStyle = '#faf9f5';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    // grid lines
+    ctx.strokeStyle = '#ece9e0';
+    ctx.lineWidth = 1;
+    for (let x=0; x<=COLS; x++){
+      ctx.beginPath();
+      ctx.moveTo(x*CELL+.5, 0); ctx.lineTo(x*CELL+.5, ROWS*CELL);
+      ctx.stroke();
+    }
+    for (let y=0; y<=ROWS; y++){
+      ctx.beginPath();
+      ctx.moveTo(0, y*CELL+.5); ctx.lineTo(COLS*CELL, y*CELL+.5);
+      ctx.stroke();
+    }
+    // cells
+    for (let y=0; y<ROWS; y++){
+      for (let x=0; x<COLS; x++){
+        if (grid[idx(x,y)]){
+          const a = age[idx(x,y)];
+          ctx.fillStyle = a <= 1 ? '#2a6f4e' : (a < 6 ? '#1a4d34' : '#1a1a1a');
+          ctx.fillRect(x*CELL+1, y*CELL+1, CELL-2, CELL-2);
+        }
+      }
+    }
+  }
+
+  // input
+  let drawing = false, drawVal = 1;
+  function cellAt(ev){
+    const r = cv.getBoundingClientRect();
+    const t = ev.touches ? ev.touches[0] : ev;
+    const x = Math.floor((t.clientX - r.left) / CELL);
+    const y = Math.floor((t.clientY - r.top) / CELL);
+    if (x<0 || y<0 || x>=COLS || y>=ROWS) return null;
+    return {x,y};
+  }
+  function pressStart(ev){
+    ev.preventDefault();
+    const c = cellAt(ev); if (!c) return;
+    drawing = true;
+    drawVal = grid[idx(c.x,c.y)] ? 0 : 1;
+    grid[idx(c.x,c.y)] = drawVal;
+    age[idx(c.x,c.y)] = drawVal;
+    updatePop(); draw();
+  }
+  function pressMove(ev){
+    if (!drawing) return;
+    ev.preventDefault();
+    const c = cellAt(ev); if (!c) return;
+    if (grid[idx(c.x,c.y)] !== drawVal){
+      grid[idx(c.x,c.y)] = drawVal;
+      age[idx(c.x,c.y)] = drawVal;
+      updatePop(); draw();
+    }
+  }
+  function pressEnd(){ drawing = false; }
+
+  cv.addEventListener('mousedown', pressStart);
+  cv.addEventListener('mousemove', pressMove);
+  window.addEventListener('mouseup', pressEnd);
+  cv.addEventListener('touchstart', pressStart, {passive:false});
+  cv.addEventListener('touchmove', pressMove, {passive:false});
+  window.addEventListener('touchend', pressEnd);
+
+  function updatePop(){
+    let p = 0;
+    for (let i=0; i<grid.length; i++) if (grid[i]) p++;
+    document.getElementById('pop').textContent = p;
+  }
+
+  // controls
+  const playBtn = document.getElementById('playBtn');
+  function setPlaying(v){
+    playing = v;
+    playBtn.textContent = playing ? '⏸ 暂停' : '▶ 开始';
+    if (timer) { clearInterval(timer); timer = null; }
+    if (playing) timer = setInterval(step, 1000 / speed);
+  }
+  playBtn.onclick = () => setPlaying(!playing);
+  document.getElementById('stepBtn').onclick = () => { if (playing) setPlaying(false); step(); };
+  document.getElementById('clearBtn').onclick = () => {
+    grid = make(); next = make(); age = make();
+    gen = 0;
+    document.getElementById('gen').textContent = 0;
+    updatePop(); draw();
+  };
+  document.getElementById('randomBtn').onclick = () => {
+    for (let i=0; i<grid.length; i++){
+      grid[i] = Math.random() < 0.28 ? 1 : 0;
+      age[i] = grid[i];
+    }
+    gen = 0;
+    document.getElementById('gen').textContent = 0;
+    updatePop(); draw();
+  };
+  document.getElementById('speed').oninput = (e) => {
+    speed = +e.target.value;
+    if (playing) setPlaying(true);
+  };
+
+  // presets
+  const PRESETS = {
+    glider: [[1,0],[2,1],[0,2],[1,2],[2,2]],
+    blinker: [[0,0],[1,0],[2,0]],
+    toad: [[1,0],[2,0],[3,0],[0,1],[1,1],[2,1]],
+    beacon: [[0,0],[1,0],[0,1],[3,2],[2,3],[3,3]],
+    pulsar: (()=>{
+      const p = [];
+      const bars = [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0]];
+      const verts = [[0,2],[5,2],[7,2],[12,2]];
+      bars.forEach(([x,y])=>p.push([x,y]));
+      [0,5,6,11].forEach(()=>{});
+      // build from symmetry
+      const base = [
+        [2,0],[3,0],[4,0],[8,0],[9,0],[10,0],
+        [0,2],[5,2],[7,2],[12,2],
+        [0,3],[5,3],[7,3],[12,3],
+        [0,4],[5,4],[7,4],[12,4],
+        [2,5],[3,5],[4,5],[8,5],[9,5],[10,5],
+        [2,7],[3,7],[4,7],[8,7],[9,7],[10,7],
+        [0,8],[5,8],[7,8],[12,8],
+        [0,9],[5,9],[7,9],[12,9],
+        [0,10],[5,10],[7,10],[12,10],
+        [2,12],[3,12],[4,12],[8,12],[9,12],[10,12],
+      ];
+      return base;
+    })(),
+    gun: [
+      [0,4],[0,5],[1,4],[1,5],
+      [10,4],[10,5],[10,6],[11,3],[11,7],[12,2],[12,8],[13,2],[13,8],
+      [14,5],[15,3],[15,7],[16,4],[16,5],[16,6],[17,5],
+      [20,2],[20,3],[20,4],[21,2],[21,3],[21,4],[22,1],[22,5],
+      [24,0],[24,1],[24,5],[24,6],
+      [34,2],[34,3],[35,2],[35,3]
+    ]
+  };
+
+  document.getElementById('preset').onchange = (e) => {
+    const k = e.target.value;
+    if (!k) return;
+    grid = make(); age = make();
+    const pat = PRESETS[k];
+    const maxX = Math.max(...pat.map(p=>p[0]));
+    const maxY = Math.max(...pat.map(p=>p[1]));
+    const ox = Math.floor((COLS - maxX) / 2);
+    const oy = Math.floor((ROWS - maxY) / 2);
+    pat.forEach(([x,y]) => {
+      const xx = x + ox, yy = y + oy;
+      if (xx>=0 && yy>=0 && xx<COLS && yy<ROWS){
+        grid[idx(xx,yy)] = 1;
+        age[idx(xx,yy)] = 1;
+      }
+    });
+    gen = 0;
+    document.getElementById('gen').textContent = 0;
+    updatePop(); draw();
+    e.target.value = '';
+  };
+
+  // keyboard
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.code === 'Space'){ e.preventDefault(); setPlaying(!playing); }
+    else if (e.key === 'n' || e.key === 'N'){ if (playing) setPlaying(false); step(); }
+    else if (e.key === 'c' || e.key === 'C'){ document.getElementById('clearBtn').click(); }
+    else if (e.key === 'r' || e.key === 'R'){ document.getElementById('randomBtn').click(); }
+  });
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  // seed with a glider so it's not empty
+  document.getElementById('preset').value = 'glider';
+  document.getElementById('preset').dispatchEvent(new Event('change'));
+})();
+</script>
+</body>
+</html>
