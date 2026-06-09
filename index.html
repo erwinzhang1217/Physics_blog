@@ -106,6 +106,15 @@ header::after{
   display:flex;align-items:center;gap:8px;box-shadow:5px 5px 0 var(--ink);
 }
 .btn-compose:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+.btn-quiz{
+  background:var(--cobalt);border:2.5px solid var(--ink);border-radius:40px;
+  padding:8px 18px;color:var(--cream);font-size:14px;font-weight:700;
+  display:inline-flex;align-items:center;gap:7px;box-shadow:4px 4px 0 var(--ink);
+}
+.btn-quiz:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+.header-actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.quiz-head{margin:4px 0 18px}
+.quiz-sub{font-size:12px;color:var(--cobalt);letter-spacing:1px;margin-top:6px;text-transform:uppercase;opacity:.8}
 .btn-back{background:none;border:none;color:var(--ink);font-size:15px;cursor:pointer;padding:24px 0;display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:900}
 .btn-back:hover{color:var(--vermillion)}
 .btn-publish{
@@ -624,7 +633,10 @@ function render() {
             <div class="quote-attr mono">— ${esc(CURRENT_QUOTE.a)}</div>
           </div>
         </div>
-        <button class="btn btn-compose" onclick="showCompose()"><span style="font-size:18px">+</span> 发布今日问题</button>
+        <div class="header-actions">
+          <button class="btn btn-compose" onclick="showCompose()"><span style="font-size:18px">+</span> 发布今日问题</button>
+          <button class="btn btn-quiz" onclick="openQuiz()">🧪 题库 →</button>
+        </div>
       </header>
       ${state.useCloud?`<div class="sync-hint mono">${state.cloudSyncing?"正在同步到云端…":"已连接云端 · 所有设备实时同步"}</div>`:""}
 
@@ -632,6 +644,17 @@ function render() {
         <div class="stat"><span class="stat-n">${state.posts.length}</span><span class="stat-l mono">问题总数</span></div>
         <div class="stat"><span class="stat-n">${streak()}</span><span class="stat-l mono">连续天数</span></div>
         <div class="stat ${todayPost?"done":"todo"}"><span class="stat-n">${todayPost?"✓":"?"}</span><span class="stat-l mono">${todayPost?"今日已发":"今日待发"}</span></div>
+      </div>
+      <footer class="mono">发现的乐趣</footer>
+    `;
+  }
+
+  else if (state.view==="quiz") {
+    app.innerHTML = `
+      <button class="btn-back" onclick="goHome()">← 返回首页</button>
+      <div class="quiz-head">
+        <div class="compose-title">题库 · 全部问题</div>
+        <p class="quiz-sub mono">共 ${state.posts.length} 个问题 · 点开任意一个开始</p>
       </div>
 
       <div class="search-wrap">
@@ -745,7 +768,7 @@ function render() {
     if(!p){state.view="home";render();return;}
     const dt=fmtDate(p.date);
     app.innerHTML = `
-      <button class="btn-back" onclick="goHome()">← 返回列表</button>
+      <button class="btn-back" onclick="openQuiz()">← 返回题库</button>
       <article class="detail">
         <div class="detail-date-row">
           <span class="detail-emoji">${p.emoji}</span>
@@ -781,6 +804,7 @@ function editPost(id){
   state.editId=id;state.showCompose=true;render();window.scrollTo(0,0);
 }
 function goHome(){state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
+function openQuiz(){state.view="quiz";state.selectedId=null;state.showCompose=false;render();window.scrollTo(0,0);logAnalytics("open_quiz",{})}
 function openPost(id){state.view="detail";state.selectedId=id;render();window.scrollTo(0,0);logAnalytics("open_post",{id})}
 function updateSearch(v){state.search=v;render();if(v&&v.length>=2)logAnalytics("search",{keyword_length:v.length})}
 function clearSearch(){state.search="";render()}
@@ -822,6 +846,7 @@ function publish(){
     logAnalytics("publish_question", { has_tags: !!state.newTags.trim(), question_length: state.newQ.trim().length });
     save();
     state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;
+    state.view="quiz";
     render();toast("发布成功！");
   }
 }
