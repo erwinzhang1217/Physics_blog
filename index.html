@@ -3,867 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日问题 — Daily Physics</title>
-<meta name="description" content="一天一个物理问题，用好奇心丈量宇宙">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230a0e1a' stroke='%2378b4ff' stroke-width='1.5'/><circle cx='16' cy='16' r='3' fill='%2378b4ff'/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700;1,9..144,900&family=Noto+Serif+SC:wght@400;700;900&family=ZCOOL+XiaoWei&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>物理随笔 · Physics Notes</title>
+<meta name="description" content="用文字丈量宇宙的边界 — 物理科普随笔">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%23222' stroke-width='1.5'/><circle cx='16' cy='16' r='3' fill='%23222'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-::selection{background:var(--vermillion);color:var(--cream)}
 
 :root{
-  --cream:#F3E7CC;
-  --cream-2:#E8D8AE;
-  --paper:#FBF3DB;
-  --ink:#191919;
-  --cobalt:#0C4F93;
-  --vermillion:#E2362C;
-  --viridian:#1C8A5B;
-  --saffron:#F3B738;
-  --coral:#F08E74;
-  --rose:#FF2E6D;
-  --lilac:#6E4CA4;
+  --bg:#fdfdfb;
+  --text:#1b1b1b;
+  --muted:#6e6e6e;
+  --faint:#9a9a96;
+  --rule:#e4e2db;
+  --link:#14507d;
 }
 
-html,body{background:var(--cream)}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 body{
-  font-family:'Noto Serif SC','Fraunces',Georgia,serif;
-  color:var(--ink);
-  min-height:100vh;
-  position:relative;
-  overflow-x:hidden;
-}
-/* paper grain */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:4;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.05  0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  opacity:.35;mix-blend-mode:multiply;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Newsreader","Noto Serif SC",Georgia,"Times New Roman",serif;
+  font-size:19px;
+  line-height:1.75;
+  font-weight:400;
 }
 
-.mono{font-family:'DM Mono','JetBrains Mono',monospace;font-feature-settings:"ss01"}
-a{color:var(--cobalt);text-decoration:none;border-bottom:2px solid var(--coral)}
+.wrap{max-width:680px;margin:0 auto;padding:0 24px 120px}
 
-/* ── Matisse background cutouts ── */
-.matisse-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.matisse-bg svg{position:absolute;mix-blend-mode:multiply;filter:drop-shadow(0 14px 30px rgba(20,10,0,.08))}
-.shape{transform-origin:center center}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 
-@keyframes drift1{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(36px,-24px) rotate(7deg)}}
-@keyframes drift2{0%,100%{transform:translate(0,0) rotate(-4deg) scale(1)}50%{transform:translate(-42px,30px) rotate(5deg) scale(1.06)}}
-@keyframes drift3{0%,100%{transform:translate(0,0) rotate(3deg)}50%{transform:translate(24px,44px) rotate(-7deg)}}
-@keyframes drift4{0%,100%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(-28px,-38px) rotate(9deg)}}
-@keyframes drift5{0%,100%{transform:translate(0,0) rotate(2deg) scale(1)}50%{transform:translate(18px,-30px) rotate(-8deg) scale(.96)}}
-@keyframes sway{0%,100%{transform:translateX(0)}50%{transform:translateX(-60px)}}
+::selection{background:#dce8f1}
 
-.s1{top:-90px;left:-70px;width:380px;animation:drift1 22s ease-in-out infinite}
-.s2{top:12%;right:-120px;width:440px;animation:drift2 28s ease-in-out infinite}
-.s3{bottom:-110px;left:4%;width:420px;animation:drift3 32s ease-in-out infinite}
-.s4{bottom:14%;right:-70px;width:320px;animation:drift4 24s ease-in-out infinite}
-.s5{top:42%;left:-140px;width:300px;animation:drift5 30s ease-in-out infinite}
-.s6{top:65%;right:10%;width:180px;animation:drift1 26s ease-in-out infinite reverse}
-.wave-band{top:-20px;left:-10%;width:120%;animation:sway 18s ease-in-out infinite}
+/* ── Masthead ── */
+.masthead{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:66px 0 20px;border-bottom:1px solid var(--rule);margin-bottom:52px;
+  flex-wrap:wrap;gap:10px 24px;
+}
+.brand .site-title{
+  font-size:22px;font-weight:600;letter-spacing:.2px;line-height:1.3;
+}
+.brand .site-title a{color:var(--text)}
+.brand .site-title a:hover{text-decoration:none;color:var(--link)}
+.brand .tagline{
+  display:block;font-size:14.5px;color:var(--muted);font-style:italic;
+  font-weight:400;margin-top:3px;
+}
+.nav{font-size:15px}
+.nav a{color:var(--muted);letter-spacing:.3px}
+.nav a:hover{color:var(--link)}
 
-@media(max-width:600px){
-  .s2,.s4,.s6{display:none}
-  .s1,.s3,.s5{width:280px}
+/* ── Post list ── */
+.post-list{list-style:none}
+.post-item{padding:26px 0;border-bottom:1px solid var(--rule)}
+.post-item:first-child{padding-top:0}
+.post-meta{
+  font-size:13px;color:var(--faint);letter-spacing:.6px;
+  font-variant-numeric:tabular-nums;text-transform:uppercase;
 }
+.post-title{font-size:24px;font-weight:600;line-height:1.32;margin:5px 0 7px;letter-spacing:-.1px}
+.post-title a{color:var(--text)}
+.post-title a:hover{color:var(--link);text-decoration:none}
+.post-excerpt{font-size:16.5px;color:var(--muted);line-height:1.62}
 
-/* ── Layout ── */
-.wrap{max-width:760px;margin:0 auto;padding:0 24px 100px;position:relative;z-index:3}
-header{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  padding:52px 0 34px;flex-wrap:wrap;gap:22px;position:relative;
-}
-header::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:16px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16'><path d='M0 8 Q 25 -1, 50 8 T 100 8 T 150 8 T 200 8' fill='none' stroke='%23E2362C' stroke-width='3' stroke-linecap='round'/></svg>");
-  background-repeat:repeat-x;background-size:200px 16px;
-}
-.logo-row{display:flex;align-items:flex-end;gap:18px}
-.logo-mark{line-height:0}
-.quote-block{max-width:560px;flex:1;min-width:260px}
-.site-title{
-  font-family:'Fraunces','Noto Serif SC',serif;
-  font-size:clamp(22px, 3vw, 32px);
-  font-weight:900;font-style:italic;
-  font-variation-settings:"opsz" 144,"SOFT" 60;
-  letter-spacing:-.4px;line-height:1.18;color:var(--rose);
-  -webkit-background-clip:initial;background-clip:initial;-webkit-text-fill-color:initial;
-}
-.quote-attr{font-family:'DM Mono',monospace;font-size:11px;color:#6B1E3F;opacity:.9;letter-spacing:2px;margin-top:10px;text-transform:uppercase;font-weight:700}
+.empty{padding:60px 0;color:var(--faint);font-style:italic;text-align:center}
 
-/* ── Animations ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px) rotate(-.8deg)}to{opacity:1;transform:translateY(0) rotate(0)}}
-@keyframes slideIn{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:translateX(0)}}
-@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
-
-/* ── Buttons ── */
-.btn{border:none;cursor:pointer;font-family:'Noto Serif SC',serif;transition:transform .2s,box-shadow .2s}
-.btn-compose{
-  background:var(--saffron);border:2.5px solid var(--ink);border-radius:40px;
-  padding:12px 24px;color:var(--ink);font-size:15px;font-weight:700;
-  display:flex;align-items:center;gap:8px;box-shadow:5px 5px 0 var(--ink);
+/* ── Article ── */
+.back{display:inline-block;font-size:15px;color:var(--muted);margin:6px 0 40px}
+.back:hover{color:var(--link);text-decoration:none}
+.article-title{
+  font-size:35px;font-weight:600;line-height:1.24;letter-spacing:-.3px;margin-bottom:16px;
 }
-.btn-compose:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
-.btn-quiz{
-  background:var(--cobalt);border:2.5px solid var(--ink);border-radius:40px;
-  padding:8px 18px;color:var(--cream);font-size:14px;font-weight:700;
-  display:inline-flex;align-items:center;gap:7px;box-shadow:4px 4px 0 var(--ink);
+.article-meta{
+  font-size:13.5px;color:var(--faint);letter-spacing:.6px;text-transform:uppercase;
+  padding-bottom:26px;margin-bottom:40px;border-bottom:1px solid var(--rule);
 }
-.btn-quiz:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
-.header-actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
-.quiz-head{margin:4px 0 18px}
-.quiz-sub{font-size:12px;color:var(--cobalt);letter-spacing:1px;margin-top:6px;text-transform:uppercase;opacity:.8}
-.btn-back{background:none;border:none;color:var(--ink);font-size:15px;cursor:pointer;padding:24px 0;display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:900}
-.btn-back:hover{color:var(--vermillion)}
-.btn-publish{
-  margin-top:28px;width:100%;padding:17px;
-  background:var(--vermillion);color:var(--cream);
-  border:2.5px solid var(--ink);border-radius:40px;
-  font-size:17px;font-weight:900;cursor:pointer;
-  box-shadow:6px 6px 0 var(--ink);
-  font-family:'Fraunces',serif;font-style:italic;letter-spacing:1px;
+.article-body{font-size:19px;line-height:1.88;color:#252525}
+.article-body p{margin-bottom:1.5em}
+.article-body p:last-child{margin-bottom:0}
+.article-tags{
+  margin-top:52px;padding-top:24px;border-top:1px solid var(--rule);
+  font-size:14px;color:var(--muted);
 }
-.btn-publish:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
-.btn-publish:disabled{opacity:.4;cursor:default;box-shadow:3px 3px 0 var(--ink)}
-.btn-like{background:var(--paper);border:2px solid var(--ink);border-radius:40px;padding:10px 22px;color:var(--ink);font-size:14px;cursor:pointer;font-weight:700}
-.btn-like.active{background:var(--rose);color:var(--cream)}
-.btn-delete{background:var(--paper);border:2px solid var(--vermillion);border-radius:40px;padding:10px 22px;color:var(--vermillion);font-size:14px;cursor:pointer;font-weight:700}
-.btn-delete:hover{background:var(--vermillion);color:var(--cream)}
-.btn-edit{background:var(--paper);border:2px solid var(--viridian);border-radius:40px;padding:10px 22px;color:var(--viridian);font-size:14px;cursor:pointer;font-weight:700}
-.btn-edit:hover{background:var(--viridian);color:var(--cream)}
-
-/* ── Stats as pasted paper chips ── */
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding:34px 0 22px}
-.stat{
-  padding:24px 12px;text-align:center;border:2.5px solid var(--ink);
-  position:relative;box-shadow:4px 4px 0 var(--ink);
-}
-.stat:nth-child(1){background:var(--cobalt);color:var(--cream);transform:rotate(-1.2deg);border-radius:42% 58% 55% 45% / 55% 45% 55% 45%}
-.stat:nth-child(2){background:var(--viridian);color:var(--cream);transform:rotate(1.4deg);border-radius:55% 45% 60% 40% / 45% 60% 40% 55%}
-.stat:nth-child(3){background:var(--saffron);color:var(--ink);transform:rotate(-.6deg);border-radius:50% 50% 45% 55% / 60% 45% 55% 40%}
-.stat.done{background:var(--viridian);color:var(--cream)}
-.stat.todo{background:var(--coral);color:var(--ink)}
-.stat-n{display:block;font-size:40px;font-weight:900;font-family:'Fraunces',serif;font-style:italic;line-height:1;margin-bottom:4px}
-.stat-l{font-size:11px;letter-spacing:1.5px;opacity:.88;text-transform:uppercase}
-
-/* ── Search ── */
-.search-wrap{position:relative;margin-bottom:16px}
-.search-wrap svg{position:absolute;left:20px;top:17px;color:var(--ink);opacity:.55}
-.search-input{
-  width:100%;padding:15px 44px 15px 48px;font-size:15px;
-  background:var(--paper);border:2.5px solid var(--ink);border-radius:40px;
-  color:var(--ink);outline:none;font-family:'Noto Serif SC',serif;
-}
-.search-input:focus{background:var(--cream);box-shadow:4px 4px 0 var(--cobalt)}
-.search-clear{position:absolute;right:18px;top:11px;background:none;border:none;color:var(--ink);font-size:22px;cursor:pointer}
-
-/* ── Cards as pasted paper ── */
-.timeline{padding-top:10px}
-.card{
-  display:flex;align-items:stretch;gap:0;
-  background:var(--paper);border:2.5px solid var(--ink);
-  border-radius:4px 24px 4px 24px;margin-bottom:24px;
-  cursor:pointer;transition:transform .25s,box-shadow .25s;overflow:hidden;
-  animation:fadeUp .6s ease both;box-shadow:6px 6px 0 var(--ink);position:relative;
-}
-.card:hover{transform:translate(-3px,-3px) rotate(-.4deg);box-shadow:9px 9px 0 var(--ink)}
-.card:nth-child(5n+1){border-radius:24px 4px 24px 4px}
-.card:nth-child(5n+2){border-radius:4px 24px 4px 24px}
-.card:nth-child(5n+3){border-radius:24px 24px 4px 24px;box-shadow:6px 6px 0 var(--cobalt)}
-.card:nth-child(5n+4){border-radius:4px 24px 24px 4px;box-shadow:6px 6px 0 var(--viridian)}
-.card:nth-child(5n+5){border-radius:24px 4px 4px 24px;box-shadow:6px 6px 0 var(--vermillion)}
-
-.card-date{
-  min-width:96px;padding:22px 12px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;border-right:2.5px solid var(--ink);
-}
-.card:nth-child(5n+1) .card-date{background:var(--cobalt);color:var(--cream)}
-.card:nth-child(5n+2) .card-date{background:var(--vermillion);color:var(--cream)}
-.card:nth-child(5n+3) .card-date{background:var(--viridian);color:var(--cream)}
-.card:nth-child(5n+4) .card-date{background:var(--saffron);color:var(--ink)}
-.card:nth-child(5n+5) .card-date{background:var(--coral);color:var(--ink)}
-.cd-month{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.9}
-.cd-day{font-size:44px;font-weight:900;font-family:'Fraunces',serif;font-style:italic;line-height:.95;margin:2px 0}
-.cd-week{font-size:11px;opacity:.85;letter-spacing:1px}
-
-.card-body{flex:1;padding:20px 14px 20px 22px}
-.card-emoji{font-size:28px;margin-bottom:6px;display:inline-block;transform:rotate(-4deg)}
-.card-q{font-size:18px;font-weight:700;line-height:1.55;color:var(--ink);margin-bottom:8px}
-.card-a{font-size:13px;color:var(--ink);opacity:.62;line-height:1.7}
-.card-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.tag{
-  font-size:11px;padding:4px 13px;border-radius:22px;
-  background:var(--cream-2);color:var(--ink);
-  border:1.5px solid var(--ink);cursor:pointer;font-weight:700;
-}
-.tag:hover{background:var(--saffron);transform:rotate(-2deg)}
-.card-arrow{display:flex;align-items:center;padding:0 22px;color:var(--ink);font-size:28px;font-family:'Fraunces',serif;font-style:italic}
-
-/* ── Detail ── */
-.detail{
-  margin:0;padding:44px 38px;
-  background:var(--paper);border:2.5px solid var(--ink);
-  border-radius:30px 6px 30px 6px;box-shadow:10px 10px 0 var(--cobalt);
-  animation:slideIn .5s ease;position:relative;
-}
-.detail-date-row{display:flex;align-items:center;gap:16px;margin-bottom:22px}
-.detail-emoji{font-size:52px;animation:bob 3.4s ease-in-out infinite;display:inline-block}
-.detail-date{font-family:'DM Mono',monospace;font-size:13px;color:var(--cobalt);letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
-.detail-q{
-  font-family:'Fraunces','Noto Serif SC',serif;
-  font-size:34px;font-weight:900;line-height:1.4;margin-bottom:26px;color:var(--ink);
-  font-variation-settings:"opsz" 144,"SOFT" 60;
-}
-.detail-div{
-  height:18px;margin-bottom:28px;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 18'><path d='M0 9 Q 25 0, 50 9 T 100 9 T 150 9 T 200 9' fill='none' stroke='%230C4F93' stroke-width='3' stroke-linecap='round'/></svg>");
-  background-repeat:repeat-x;background-size:200px 18px;
-}
-.detail-a{font-size:17px;line-height:2;color:var(--ink);opacity:.88}
-.detail-tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:32px}
-.tag-lg{
-  font-family:'Fraunces',serif;font-style:italic;
-  font-size:14px;padding:7px 18px;border-radius:30px;
-  background:var(--saffron);color:var(--ink);
-  border:2px solid var(--ink);font-weight:700;
-}
-.tag-lg:nth-child(2n){background:var(--coral)}
-.tag-lg:nth-child(3n){background:var(--viridian);color:var(--cream)}
-.detail-actions{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
-
-/* ── Compose ── */
-.compose-title{font-family:'Fraunces',serif;font-style:italic;font-size:32px;font-weight:900;color:var(--vermillion);margin-bottom:6px}
-.compose-card{
-  padding:36px 32px;background:var(--paper);
-  border:2.5px solid var(--ink);border-radius:24px 6px 24px 6px;
-  box-shadow:10px 10px 0 var(--viridian);
-  animation:fadeUp .5s ease;
-}
-.date-badge{
-  display:inline-block;font-size:12px;padding:7px 20px;border-radius:30px;
-  background:var(--cobalt);color:var(--cream);margin-bottom:24px;
-  font-family:'DM Mono',monospace;letter-spacing:1px;font-weight:700;
-  border:2px solid var(--ink);
-}
-.field-label{display:block;font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--vermillion);margin:22px 0 10px;font-weight:700}
-.emoji-row{display:flex;gap:10px;flex-wrap:wrap}
-.emoji-btn{
-  width:48px;height:48px;border-radius:50%;font-size:22px;
-  background:var(--cream);border:2px solid var(--ink);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s;
-}
-.emoji-btn.active{background:var(--saffron);transform:scale(1.15) rotate(-6deg)}
-textarea,input[type=text]{
-  width:100%;padding:14px 18px;font-size:15px;line-height:1.85;
-  background:var(--cream);border:2px solid var(--ink);border-radius:16px;
-  color:var(--ink);resize:vertical;outline:none;font-family:'Noto Serif SC',serif;
-}
-textarea:focus,input[type=text]:focus{box-shadow:4px 4px 0 var(--cobalt)}
-
-/* ── Toast ── */
-.toast{
-  position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
-  background:var(--viridian);color:var(--cream);padding:14px 34px;
-  border-radius:40px;font-size:15px;font-weight:900;z-index:999;
-  border:2.5px solid var(--ink);box-shadow:5px 5px 0 var(--ink);
-  font-family:'Fraunces',serif;font-style:italic;
-  animation:toastIn .35s ease;pointer-events:none;
-}
-
-/* ── Empty ── */
-.empty{text-align:center;padding:70px 20px}
-.empty-icon{font-size:60px;margin-bottom:16px;display:inline-block;animation:bob 3s ease-in-out infinite}
-.empty-text{color:var(--ink);opacity:.6;font-size:16px;font-style:italic;font-family:'Fraunces',serif}
+.article-tags .label{color:var(--faint);margin-right:8px}
+.article-tags a{color:var(--muted)}
+.article-tags a:hover{color:var(--link)}
 
 /* ── Footer ── */
-footer{text-align:center;padding:52px 20px 20px;font-size:12px;color:var(--ink);opacity:.55;letter-spacing:2.5px;font-family:'DM Mono',monospace;text-transform:uppercase}
-
-/* ── Sync hint ── */
-.sync-hint{
-  font-size:12px;color:var(--cobalt);text-align:center;padding:10px 14px;margin-bottom:14px;
-  border:2px dashed var(--cobalt);border-radius:30px;background:var(--cream-2);
-  font-family:'DM Mono',monospace;letter-spacing:1px;font-weight:700;
+footer{
+  margin-top:84px;padding-top:26px;border-top:1px solid var(--rule);
+  font-size:13px;color:var(--faint);letter-spacing:.5px;text-align:center;
 }
 
-/* ── Responsive ── */
-@media(max-width:520px){
-  .site-title{font-size:22px}
-  .quote-block{min-width:0}
-  .detail{padding:28px 22px}
-  .detail-q{font-size:25px}
-  .stats{gap:10px}
-  .stat{padding:18px 6px}
-  .stat-n{font-size:30px}
-  .card-date{min-width:76px;padding:18px 8px}
-  .cd-day{font-size:34px}
+@media(max-width:560px){
+  body{font-size:18px}
+  .masthead{padding-top:48px}
+  .article-title{font-size:29px}
+  .article-body{font-size:18px}
 }
-
-/* ── Butterfly + Twistor card scene ── */
-.card-butterfly-scene{
-  width:100%;height:54px;overflow:hidden;margin:4px 0 2px;position:relative;
-}
-.butterfly-anim{width:100%;height:100%;display:block}
-
-/* Twistor flowing lines — staggered dash animation */
-.twistor{
-  stroke-dasharray:18 12;
-  animation:twistFlow 4s linear infinite;
-  opacity:.7;
-}
-.t1{animation-duration:3.4s;stroke-dasharray:22 10}
-.t2{animation-duration:4.8s;animation-direction:reverse;stroke-dasharray:14 18}
-.t3{animation-duration:3.8s;stroke-dasharray:20 8}
-.t4{animation-duration:5.2s;animation-direction:reverse;stroke-dasharray:12 16}
-.t5{animation-duration:4.2s;stroke-dasharray:16 14}
-@keyframes twistFlow{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-60}}
-
-/* Butterfly wing flapping */
-.wing-l,.wing-lb{animation:flapL .35s ease-in-out infinite alternate;transform-origin:0 0}
-.wing-r,.wing-rb{animation:flapR .35s ease-in-out infinite alternate;transform-origin:0 0}
-@keyframes flapL{0%{transform:scaleX(1) rotate(0)}100%{transform:scaleX(.35) rotate(8deg)}}
-@keyframes flapR{0%{transform:scaleX(1) rotate(0)}100%{transform:scaleX(.35) rotate(-8deg)}}
-
-/* ── Moon / Observer card scene ── */
-.card-moon-scene{width:100%;height:54px;overflow:hidden;margin:4px 0 2px;position:relative}
-.moon-anim{width:100%;height:100%;display:block}
-.moon-solid{animation:moonObs 4.4s ease-in-out infinite;transform-origin:160px 30px}
-.moon-ghost{animation:moonSuper 4.4s ease-in-out infinite}
-.moon-cloud{animation:moonCloud 4.4s ease-in-out infinite;transform-origin:160px 30px;transform-box:fill-box}
-.ghost-l{animation:ghostL 4.4s ease-in-out infinite}
-.ghost-r{animation:ghostR 4.4s ease-in-out infinite}
-.eye{animation:blink 4.4s ease-in-out infinite;transform-origin:260px 30px;transform-box:fill-box}
-.eye-iris{animation:irisFade 4.4s ease-in-out infinite}
-@keyframes moonObs{0%,30%{opacity:1;transform:scale(1)}42%,58%{opacity:0;transform:scale(.8)}70%,100%{opacity:1;transform:scale(1)}}
-@keyframes moonSuper{0%,30%{opacity:0}42%,58%{opacity:1}70%,100%{opacity:0}}
-@keyframes moonCloud{0%,30%{opacity:.15;transform:scale(.75)}42%,58%{opacity:.9;transform:scale(1.2)}70%,100%{opacity:.15;transform:scale(.75)}}
-@keyframes ghostL{0%,30%{transform:translateX(4px)}42%,58%{transform:translateX(-11px)}70%,100%{transform:translateX(4px)}}
-@keyframes ghostR{0%,30%{transform:translateX(-4px)}42%,58%{transform:translateX(11px)}70%,100%{transform:translateX(-4px)}}
-@keyframes blink{0%,30%{transform:scaleY(1)}42%,58%{transform:scaleY(.08)}70%,100%{transform:scaleY(1)}}
-@keyframes irisFade{0%,30%{opacity:1}42%,58%{opacity:0}70%,100%{opacity:1}}
-.mstar{animation:twinkle 2.6s ease-in-out infinite}
-.ms2{animation-delay:.6s}.ms3{animation-delay:1.2s}.ms4{animation-delay:1.8s}.ms5{animation-delay:.3s}
-@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
-
-/* ── Hidden answer ── */
-.answer-hidden{filter:blur(10px);user-select:none;pointer-events:none;transition:filter .6s ease}
-.answer-hidden.revealed{filter:none;user-select:auto;pointer-events:auto}
-.btn-reveal{
-  background:var(--vermillion);color:var(--cream);
-  border:2.5px solid var(--ink);border-radius:40px;
-  padding:12px 28px;font-size:15px;font-weight:900;cursor:pointer;
-  font-family:'Fraunces',serif;font-style:italic;
-  box-shadow:5px 5px 0 var(--ink);margin:20px 0;
-  transition:transform .2s,box-shadow .2s;
-}
-.btn-reveal:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
 </style>
-<!-- Firebase compat SDK (Realtime Database) -->
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
 </head>
 <body>
 
-<div class="matisse-bg" aria-hidden="true">
-  <svg class="shape s1" viewBox="0 0 200 200"><path d="M48 18 Q130 -8 172 58 T150 168 Q70 206 26 140 T48 18 Z" fill="#0C4F93"/></svg>
-  <svg class="shape s2" viewBox="0 0 200 200"><path d="M30 70 Q 10 12 90 18 T 180 40 Q 210 120 150 170 T 40 180 Q -10 130 30 70 Z" fill="#E2362C"/></svg>
-  <svg class="shape s3" viewBox="0 0 200 200"><path d="M20 100 Q 0 30 80 20 T 180 70 Q 200 140 140 180 T 30 170 Q -20 150 20 100 Z" fill="#1C8A5B"/></svg>
-  <svg class="shape s4" viewBox="0 0 200 200"><path d="M60 10 Q 160 0 180 80 T 140 180 Q 40 200 20 110 T 60 10 Z" fill="#F3B738"/></svg>
-  <svg class="shape s5" viewBox="0 0 200 200"><path d="M40 30 Q 120 -10 170 60 T 160 160 Q 80 200 30 130 T 40 30 Z" fill="#F08E74"/></svg>
-  <svg class="shape s6" viewBox="0 0 200 200"><path d="M50 20 Q 150 0 180 80 T 130 180 Q 30 200 20 110 T 50 20 Z" fill="#6E4CA4"/></svg>
-  <svg class="shape wave-band" viewBox="0 0 1200 80" preserveAspectRatio="none"><path d="M0 40 Q 150 -10 300 40 T 600 40 T 900 40 T 1200 40" fill="none" stroke="#E2362C" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 14"/></svg>
-</div>
 <div class="wrap" id="app"></div>
 
 <script>
-const STORAGE_KEY = "physics-blog-posts";
-/** Realtime Database document path (single object: { items: [...], updatedAt }) */
-const RTDB_PATH = "physics_blog_posts";
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-/**
- * Paste your Firebase web app config here after creating a Realtime Database.
- * See FIREBASE_SETUP.md. Leave apiKey as REPLACE_ME to use localStorage only.
- */
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDj29-P7LI2NYofKGjSq6ckhRjuxUNeuJw",
-  authDomain: "physicsblog-b5a0e.firebaseapp.com",
-  databaseURL: "https://physicsblog-b5a0e-default-rtdb.firebaseio.com",
-  projectId: "physicsblog-b5a0e",
-  storageBucket: "physicsblog-b5a0e.firebasestorage.app",
-  messagingSenderId: "738143028403",
-  appId: "1:738143028403:web:3a6f63dda318ead61cdcc6",
-  measurementId: "G-TXP2TZCRW9",
-};
+/* ── Blog posts ──
+   Long-form essays. Replace these with your own.
+   body: separate paragraphs with a blank line (\n\n). */
+const POSTS = [
+  {
+    id:"b1", date:"2026-06-09",
+    title:"中心极限定理，其实是最简单的重整化群",
+    tags:["重整化群","中心极限定理","普适性"],
+    body:`钟形曲线无处不在。考试分数、测量误差、分子速率、股票每日涨跌——只要你把足够多的随机因素加在一起，结果的分布几乎总是那条对称的高斯钟形线。这就是中心极限定理：取 N 个独立同分布、且方差有限的随机变量，求和、减去均值、再除以 √N，当 N 趋于无穷，得到的分布必然收敛到高斯分布。最惊人的是它的「健忘」——原始变量长什么样根本不重要，骰子也好、硬币也罢、任何古怪的分布，最后都磨成同一条钟形线。只有均值和方差幸存，其余的微观细节统统被冲刷干净。
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const WEEKDAYS = ["日","一","二","三","四","五","六"];
-const EMOJIS = ["🔬","⚡","🌍","🧲","💡","🌌","⭐","🤚","🔭","🧪","☀️","🌊"];
+为什么会这样？答案藏在二十世纪物理学最深刻的思想之一里：重整化群。
 
-const QUOTES = [
-  {t:"想象力比知识更重要。", a:"Einstein"},
-  {t:"Imagination is more important than knowledge.", a:"Einstein"},
-  {t:"宇宙最不可理解的，是它竟然可以被理解。", a:"Einstein"},
-  {t:"The most incomprehensible thing about the universe is that it is comprehensible.", a:"Einstein"},
-  {t:"上帝不掷骰子。", a:"Einstein"},
-  {t:"God does not play dice with the universe.", a:"Einstein"},
-  {t:"The most beautiful thing we can experience is the mysterious.", a:"Einstein"},
-  {t:"我宁愿有疑问，而不是答案。", a:"Feynman"},
-  {t:"I would rather have questions that can't be answered than answers that can't be questioned.", a:"Feynman"},
-  {t:"自然不会被愚弄。", a:"Feynman"},
-  {t:"Nature cannot be fooled.", a:"Feynman"},
-  {t:"What I cannot create, I do not understand.", a:"Feynman"},
-  {t:"If you think you understand quantum mechanics, you don't understand quantum mechanics.", a:"Feynman"},
-  {t:"你不能欺骗自己——而你正是最容易被骗的那个人。", a:"Feynman"},
-  {t:"我们都是星尘。", a:"Carl Sagan"},
-  {t:"We are made of star-stuff.", a:"Carl Sagan"},
-  {t:"Somewhere, something incredible is waiting to be known.", a:"Carl Sagan"},
-  {t:"科学是一种思维方式，远胜于它作为知识的总和。", a:"Carl Sagan"},
-  {t:"谁不为量子论震惊，就是没真正懂它。", a:"Bohr"},
-  {t:"Anyone not shocked by quantum mechanics has not understood it.", a:"Bohr"},
-  {t:"Shut up and calculate.", a:"Mermin"},
-  {t:"闭嘴，算下去。", a:"Mermin"},
-  {t:"熵，是时间的箭头。", a:"Eddington"},
-  {t:"The universe is under no obligation to make sense to you.", a:"Neil deGrasse Tyson"},
-  {t:"宇宙没有义务让你理解。", a:"Neil deGrasse Tyson"},
-  {t:"万物皆流。", a:"Heraclitus"},
-  {t:"真空并不空。", a:"—"},
-  {t:"Not only is the universe stranger than we imagine, it is stranger than we can imagine.", a:"Haldane"},
-  {t:"宇宙不仅比我们想象的更奇怪，而且比我们能想象的更奇怪。", a:"Haldane"},
-  {t:"Physics is like sex: sure, it may give some practical results, but that's not why we do it.", a:"Feynman"},
-  {t:"一个方程，是永恒的事。", a:"Einstein"},
-  {t:"把复杂的事情说简单，是天才；把简单的事说复杂，是学者。", a:"—"},
+让我们换个角度看中心极限定理。定义一个作用在「概率分布空间」上的变换 R：取两个独立的同分布副本，把它们相加（在概率上就是做一次卷积），再把结果整体压缩 1/√2 倍，好让方差保持不变。然后一次次重复这个操作。仔细看——这正是「粗粒化 + 重标度」的结构，和物理学家对一块磁体反复做的事情如出一辙：把相邻的自旋抱成一团当作一个新自旋，再把尺子放大。这，就是一次重整化群变换。
+
+在这套语言下，中心极限定理变成了一句极简洁的话：高斯分布是变换 R 的不动点。R 作用在高斯上，吐出来的还是高斯；而且它是一个有吸引力的不动点——任何方差有限的分布，在反复迭代下都会被拉向它。换句话说，分布收敛到钟形曲线的过程，字面意义上就是一条重整化群流，缓缓汇入它的不动点。
+
+那些偏离高斯的特征呢？比如分布的偏度、峰度、更高阶的累积量——在重整化群的语言里，它们是「无关方向」(irrelevant directions)：每迭代一次，它们就缩小一点，最终归零。这正是微观细节「不重要」的精确含义：它们在重整化意义下是无关的。而完全相同的机制，解释了临界点附近的普适性——水在临界点的行为、磁体在居里温度的行为，它们的临界指数只取决于维度与对称性，与分子之间究竟怎样相互作用无关。无关的，都被流冲走了。
+
+不动点也不止一个。如果原始分布的方差是无穷大（重尾分布，比如某些金融收益或物理学里的反常扩散），求和后该除以的就不再是 √N，而是 N 的另一个幂次 N^{1/α}，于是你流向的是另一族不动点——莱维稳定分布。它们构成了不同的「普适类」，正如物理学里有伊辛普适类、海森堡普适类。
+
+1975 年，物理学家 Jona-Lasinio 把这层联系挑明：中心极限定理不是概率论里一条孤立的奇迹，而是重整化群思想最干净、最古老的范例。你考卷直方图上那条钟形线，和流体在临界点泛起的乳白色临界乳光，背后是同一个数学观念在起作用——在一次次粗粒化之下，系统会遗忘自己的出身，流向那为数不多的、universal 的不动点。`,
+  },
 ];
 
-function dateHash(){
-  const d=new Date();
-  return d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate();
-}
-function pickQuote(){
-  const mode = Math.random() < 0.5 ? "daily" : "random";
-  const i = mode === "daily"
-    ? dateHash() % QUOTES.length
-    : Math.floor(Math.random() * QUOTES.length);
-  return QUOTES[i];
-}
-const CURRENT_QUOTE = pickQuote();
-
-const DEFAULT_POSTS = [
-  {id:"p9",date:"2026-04-22",question:"镜子为什么把左右颠倒，却不把上下颠倒？",answer:"其实——镜子根本没有把左右颠倒。它颠倒的，是「前后」。\n\n镜面只翻转一个方向：垂直于自己的那一维。你正对着一面墙上的镜子站着，被翻转的就是「前后」轴——原本朝前的鼻尖，在镜中朝着你；左右和上下，都纹丝未动。\n\n那为什么我们觉得「左右反了」？因为人在看到镜中那个「自己」时，会本能地把他当作面对自己的另一个人——下意识地想象自己绕着竖直轴转过去和他面对面。这一转，原本的前后翻转，就被脑子翻译成了「左右翻转」。\n\n证据更直接的，是文字：「上」字在镜中变成镜像字，并不是因为上下颠倒，也不是因为左右颠倒，而是因为字面被前后翻过去了。\n\n而把镜子平放在地上，低头看你的倒影——这次它翻的是上下轴，你的影子头朝下。镜子翻什么，全看你怎么放它。\n\n镜子从不偏爱左右，是我们「站着面对它」的习惯，让我们替它背了这个锅。",tags:["光学","对称性","认知"],emoji:"🪞",liked:false},
-  {id:"p8",date:"2026-04-17",question:"月亮没人看的时候，它还在吗？",answer:"1950 年代，爱因斯坦和物理学家 Abraham Pais 在普林斯顿散步时，忽然停下来问：「你真的相信，没人看的时候，月亮就不存在吗？」\n\n这句话直指量子力学的核心——哥本哈根诠释认为，粒子在被测量之前并不具有确定的位置，它只是一团「可能性的云」。只有观察的那一刻，波函数才「坍缩」成一个确定的结果。\n\n那月亮呢？月亮当然一直都在。因为它时刻被无数光子、空气分子、甚至引力场「观察」着——这就是量子退相干 (decoherence)。宏观物体无法维持叠加态，它们早已被环境「测量」得清清楚楚。\n\n但在微观世界里，爱因斯坦的困惑依然没有答案：在你没看它之前，那个电子到底在哪里？是它「已经」在某处，还是你的观察「创造」了那里？这道缝，一百年来无人能补。",tags:["量子力学","观察者效应","哲学"],emoji:"🌙",liked:false,hideAnswer:true,scene:"moon"},
-  {id:"p7",date:"2026-04-16",question:"蝴蝶掀起龙卷风???",answer:"1963 年，气象学家 Edward Lorenz 在模拟天气时发现：初始条件的微小偏差——小数点后第六位——足以在几天后产生完全不同的气象结果。\n\n他后来写了那篇著名的讲稿标题：「巴西的一只蝴蝶扇动翅膀，能否引发德克萨斯的一场龙卷风？」\n\n这不是说蝴蝶真的「制造」了龙卷风，而是大气是一个混沌系统——对初始条件极度敏感。微小的扰动经过非线性放大，结果完全不可预测。这就是为什么天气预报超过一周就很不靠谱。\n\n有趣的是，混沌≠随机。混沌系统有确定的规则（方程是确定的），但结果在实践中不可预测。Lorenz 奇异吸引子的形状——像一只蝴蝶——成了混沌理论最著名的图腾。",tags:["混沌理论","蝴蝶效应","气象"],emoji:"🦋",liked:false,hideAnswer:true},
-  {id:"p6",date:"2026-04-14",question:"粉色不存在！？",answer:"打开彩虹看看——你会发现里面没有粉色。红、橙、黄、绿、青、蓝、紫，每一种都对应一个特定波长的光，但粉色呢？它在光谱上找不到自己的位置。\n\n粉色（品红/洋红）是一种「非光谱色」(non-spectral color)。它不对应任何单一波长，而是当红光和紫光同时进入你的眼睛、中间的绿光却缺席时，大脑「发明」出来的颜色。\n\n换句话说，粉色是大脑为了填补光谱两端的缺口而编造的一种感知——一种纯粹的「脑内色」。所以说「粉色不存在」，指的是它在物理世界的光谱里并不存在，它只存在于你的视觉系统里。",tags:["光学","色彩","视觉"],emoji:"🌈",liked:false},
-  {id:"p5",date:"2026-04-11",question:"几条最简单的规则，能不能「长出」复杂的生命？",answer:"1970 年，数学家 John Conway 定义了一个只有四条规则的细胞世界：\n\n• 活细胞邻居少于 2 个 → 孤独而死\n• 活细胞邻居多于 3 个 → 拥挤而死\n• 活细胞邻居恰好 2 或 3 个 → 继续存活\n• 死细胞邻居恰好 3 个 → 诞生新生命\n\n就是这四条规则，却能演化出滑翔机、脉冲星、甚至能「射出」飞船的枪。它是「涌现 (emergence)」最经典的例子——局部的简单规则，产生全局的复杂行为。\n\n下面是一个可以玩的生命游戏：点格子画图案，或选一个预设，按「开始」让它自己演化。看看你能造出什么？",tags:["涌现","元胞自动机","复杂系统"],emoji:"🌱",liked:false,quizUrl:"game_of_life.html"},
-  {id:"p4",date:"2026-04-07",question:"陶瓷与做饭里藏着哪些反直觉的物理？",answer:"拉坯时手该往哪个方向使力？同一种釉料怎么烧出完全不同的颜色？陶瓷比玻璃耐热冲击，靠的居然不是导热？焯菜加盐真的能让水更烫吗？铸铁锅煎牛排更好的秘密是什么？\n\n第三组判断题，3 道陶瓷 + 2 道做饭，来试试吧！",tags:["陶瓷","做饭","物理"],emoji:"🔬",liked:false,quizUrl:"ceramics_quiz3.html"},
-  {id:"p3",date:"2026-04-02",question:"陶瓷与攀岩里藏着哪些反直觉的物理？",answer:"从还原焰让瓷器变青，到「死点」技术让攀岩者瞬间「失重」——日常工艺与运动中藏着许多出乎意料的物理原理。\n\n试试下面的判断题，看看你能答对几道！",tags:["陶瓷","攀岩","物理"],emoji:"🧪",liked:false,quizUrl:"ceramics_climbing_quiz2.html"},
-  {id:"p2",date:"2026-03-28",question:"你摸到一个东西的时候，真的碰到它了吗？",answer:"从未真正碰到！原子之间的电子云产生电磁排斥力，让原子永远无法真正接触。你感受到的「触感」其实是电磁力的推力。\n\n你一生中从未真正接触过任何东西。手指和杯子之间永远有约0.1纳米的间隙——一根头发的百万分之一。这个间隙充满了电磁排斥力，正是这股力量让你感觉到「碰到了」。所有的触感，都是原子间那道看不见的电磁墙。",tags:["量子力学","电磁力","原子"],emoji:"🤚",liked:false},
-  {id:"p1",date:"2026-03-27",question:"如果现在有一颗星星消失了熄灭了炸了，我们还能不能看到它？",answer:"能看到！光的速度是有限的，星光穿越了几百甚至几千光年才到达我们眼中。即使星星已经消失，它的光仍在路上。我们每晚仰望的星空，看到的其实是宇宙的「过去」。\n\n一颗距离我们1000光年的星星，它的光需要1000年才能到达地球。如果它今天爆炸了，我们要等到1000年后才能「看到」它消失。在这之前，它在我们眼中依然闪亮如初。",tags:["天文学","光速","超新星"],emoji:"⭐",liked:false}
-];
-
-let state = { posts: [], view: "home", selectedId: null, showCompose: false, editId: null, search: "", newQ: "", newA: "", newTags: "", newEmoji: "🔬", useCloud: false, cloudSyncing: false };
-
-let postsRef = null;
-
-function isFirebaseConfigured() {
-  const c = FIREBASE_CONFIG;
-  return !!(
-    c.apiKey &&
-    c.apiKey !== "REPLACE_ME" &&
-    c.databaseURL &&
-    !String(c.databaseURL).includes("REPLACE_ME")
-  );
-}
-
-/** Firebase may return arrays as objects with numeric keys */
-function normalizePosts(val) {
-  if (val == null) return [];
-  if (Array.isArray(val)) return val.filter(Boolean);
-  if (typeof val === "object") {
-    return Object.keys(val)
-      .sort((a, b) => Number(a) - Number(b))
-      .map((i) => val[i])
-      .filter(Boolean);
-  }
-  return [];
-}
-
-function cacheToLocal() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.posts)); } catch (_) {}
-}
-
-function loadFromCache() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length) state.posts = parsed;
-  } catch (_) {}
-}
-
-function loadLegacyLocalOnly() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    state.posts = raw ? JSON.parse(raw) : [...DEFAULT_POSTS];
-  } catch (_) { state.posts = [...DEFAULT_POSTS]; }
-  if (!state.posts.length) state.posts = [...DEFAULT_POSTS];
-}
-
-function save() {
-  cacheToLocal();
-  if (state.useCloud && postsRef) {
-    state.cloudSyncing = true;
-    postsRef.set({ items: state.posts, updatedAt: Date.now() }, (err) => {
-      state.cloudSyncing = false;
-      if (err) {
-        console.error(err);
-        toast("云端保存失败，已写入本机缓存");
-      }
-      render();
-    });
-  }
-}
-
-function bootstrapData() {
-  if (!isFirebaseConfigured() || typeof firebase === "undefined") {
-    loadLegacyLocalOnly();
-    state.useCloud = false;
-    render();
-    return;
-  }
-
-  try {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    if (typeof firebase.analytics === "function") firebase.analytics();
-    postsRef = firebase.database().ref(RTDB_PATH);
-    state.useCloud = true;
-    loadFromCache();
-    render();
-
-    postsRef.on(
-      "value",
-      (snap) => {
-        const data = snap.val();
-        if (data === null) {
-          postsRef.set({ items: [...DEFAULT_POSTS], updatedAt: Date.now() });
-          return;
-        }
-        if (data.items === undefined || data.items === null) {
-          postsRef.set({ items: [...DEFAULT_POSTS], updatedAt: Date.now() });
-          return;
-        }
-        let items = normalizePosts(data.items);
-        // Seed any DEFAULT_POSTS that are missing (e.g. new quiz post)
-        let needsSave = false;
-        DEFAULT_POSTS.forEach(dp => {
-          if (!items.some(p => p.id === dp.id)) {
-            items = [dp, ...items];
-            needsSave = true;
-          }
-        });
-        if (needsSave) {
-          postsRef.set({ items, updatedAt: Date.now() });
-        }
-        state.posts = items;
-        cacheToLocal();
-        render();
-      },
-      (err) => {
-        console.error(err);
-        toast("无法连接云端，使用本地数据");
-        if (!state.posts.length) loadLegacyLocalOnly();
-        state.useCloud = false;
-        render();
-      }
-    );
-  } catch (e) {
-    console.error(e);
-    toast("Firebase 初始化失败");
-    loadLegacyLocalOnly();
-    state.useCloud = false;
-    render();
-  }
-}
-
-function todayStr() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
-function fmtDate(s) {
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function fmtDate(s){
   const d=new Date(s+"T00:00:00");
-  return { month:MONTHS[d.getMonth()], day:d.getDate(), weekday:`星期${WEEKDAYS[d.getDay()]}`, full:`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日` };
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
-function streak() {
-  let c=0, d=new Date();
-  for(let i=0;i<365;i++){
-    const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    if(state.posts.some(p=>p.date===ds)){c++;d.setDate(d.getDate()-1)} else break;
-  }
-  return c;
-}
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
-function nl2br(s){return esc(s).replace(/\n/g,"<br>")}
+function excerpt(body,n){const flat=body.replace(/\s+/g," ").trim();return flat.length>n?flat.slice(0,n)+"…":flat;}
+function paras(body){return body.split(/\n\n+/).map(p=>`<p>${esc(p).replace(/\n/g,"<br>")}</p>`).join("");}
 
-function toast(msg) {
-  const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
-  document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
-}
+let state = { view:"home", id:null };
 
-function logAnalytics(eventName, params) {
-  try {
-    if (typeof firebase !== "undefined" && typeof firebase.analytics === "function") {
-      firebase.analytics().logEvent(eventName, params || {});
-    }
-  } catch (_) {}
-}
+const MASTHEAD = `
+  <header class="masthead">
+    <div class="brand">
+      <div class="site-title"><a href="#" onclick="goHome();return false">Physics Notes</a></div>
+    </div>
+    <nav class="nav"><a href="quiz.html">Q →</a></nav>
+  </header>`;
 
-function render() {
+function render(){
   const app = document.getElementById("app");
-  const today = todayStr();
-  const todayPost = state.posts.find(p=>p.date===today);
-  const sortedPosts = [...state.posts].sort((a,b)=>b.date.localeCompare(a.date));
-  const filtered = state.search ? sortedPosts.filter(p=> p.question.includes(state.search)||p.answer.includes(state.search)||p.tags.some(t=>t.includes(state.search))) : sortedPosts;
+  const sorted = [...POSTS].sort((a,b)=>b.date.localeCompare(a.date));
 
-  if (state.view==="home" && !state.showCompose) {
+  if (state.view === "home") {
     app.innerHTML = `
-      <header>
-        <div class="logo-row">
-          <div class="logo-mark">
-            <svg width="54" height="54" viewBox="0 0 60 60"><path d="M10 30 Q 8 6 30 8 Q 56 12 52 32 Q 48 56 26 52 Q 4 48 10 30 Z" fill="#E2362C" stroke="#191919" stroke-width="2.5"/><path d="M22 30 Q 26 20 36 24 Q 42 30 34 38 Q 24 42 22 30 Z" fill="#F3B738" stroke="#191919" stroke-width="2"/></svg>
-          </div>
-          <div class="quote-block">
-            <div class="site-title">${esc(CURRENT_QUOTE.t)}</div>
-            <div class="quote-attr mono">— ${esc(CURRENT_QUOTE.a)}</div>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button class="btn btn-compose" onclick="showCompose()"><span style="font-size:18px">+</span> 发布今日问题</button>
-          <button class="btn btn-quiz" onclick="openQuiz()">🧪 题库 →</button>
-        </div>
-      </header>
-      ${state.useCloud?`<div class="sync-hint mono">${state.cloudSyncing?"正在同步到云端…":"已连接云端 · 所有设备实时同步"}</div>`:""}
-
-      <div class="stats">
-        <div class="stat"><span class="stat-n">${state.posts.length}</span><span class="stat-l mono">问题总数</span></div>
-        <div class="stat"><span class="stat-n">${streak()}</span><span class="stat-l mono">连续天数</span></div>
-        <div class="stat ${todayPost?"done":"todo"}"><span class="stat-n">${todayPost?"✓":"?"}</span><span class="stat-l mono">${todayPost?"今日已发":"今日待发"}</span></div>
-      </div>
-      <footer class="mono">发现的乐趣</footer>
+      ${MASTHEAD}
+      ${sorted.length===0 ? `<p class="empty">还没有文章，写下第一篇吧。</p>` : `
+      <ul class="post-list">
+        ${sorted.map(p=>`
+          <li class="post-item">
+            <div class="post-meta">${fmtDate(p.date)}</div>
+            <h2 class="post-title"><a href="#${p.id}" onclick="openPost('${p.id}');return false">${esc(p.title)}</a></h2>
+            <p class="post-excerpt">${esc(excerpt(p.body,96))}</p>
+          </li>`).join("")}
+      </ul>`}
+      <footer>Physics Notes</footer>
     `;
   }
 
-  else if (state.view==="quiz") {
-    app.innerHTML = `
-      <button class="btn-back" onclick="goHome()">← 返回首页</button>
-      <div class="quiz-head">
-        <div class="compose-title">题库 · 全部问题</div>
-        <p class="quiz-sub mono">共 ${state.posts.length} 个问题 · 点开任意一个开始</p>
-      </div>
-
-      <div class="search-wrap">
-        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="11" y1="11" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input class="search-input mono" placeholder="搜索问题、标签..." value="${esc(state.search)}" oninput="updateSearch(this.value)">
-        ${state.search?`<button class="search-clear" onclick="clearSearch()">×</button>`:""}
-      </div>
-
-      <div class="timeline">
-        ${filtered.length===0?`<div class="empty"><div class="empty-icon">🔭</div><p class="empty-text">还没有内容，发布你的第一个物理问题吧！</p></div>`:
-          filtered.map((p,i)=>{
-            const dt=fmtDate(p.date);
-            return `<div class="card" style="animation-delay:${i*0.07}s" onclick="openPost('${p.id}')">
-              <div class="card-date">
-                <div class="cd-month mono">${dt.month}</div>
-                <div class="cd-day">${dt.day}</div>
-                <div class="cd-week">${dt.weekday}</div>
-              </div>
-              <div class="card-body">
-                <div class="card-emoji">${p.emoji}</div>
-                <div class="card-q">${esc(p.question)}</div>
-                ${p.hideAnswer?(p.scene==="moon"?`<div class="card-moon-scene">
-                  <svg class="moon-anim" viewBox="0 0 320 60" preserveAspectRatio="xMidYMid meet">
-                    <circle class="mstar ms1" cx="30" cy="14" r="1.3" fill="var(--saffron)"/>
-                    <circle class="mstar ms2" cx="78" cy="44" r=".9" fill="var(--rose)"/>
-                    <circle class="mstar ms3" cx="112" cy="10" r="1" fill="var(--saffron)"/>
-                    <circle class="mstar ms4" cx="215" cy="8" r="1.2" fill="var(--cobalt)"/>
-                    <circle class="mstar ms5" cx="300" cy="48" r="1" fill="var(--rose)"/>
-                    <g class="moon-cloud">
-                      <ellipse cx="160" cy="30" rx="26" ry="20" fill="none" stroke="var(--cobalt)" stroke-width="1" stroke-dasharray="3 4" opacity=".55"/>
-                      <ellipse cx="160" cy="30" rx="18" ry="13" fill="none" stroke="var(--rose)" stroke-width="1" stroke-dasharray="2 5" opacity=".5"/>
-                    </g>
-                    <g class="moon-ghost">
-                      <circle class="ghost-l" cx="160" cy="30" r="12" fill="var(--saffron)" opacity=".5"/>
-                      <circle class="ghost-r" cx="160" cy="30" r="12" fill="var(--rose)" opacity=".5"/>
-                    </g>
-                    <g class="moon-solid">
-                      <circle cx="160" cy="30" r="15" fill="var(--saffron)" stroke="var(--ink)" stroke-width="1.5"/>
-                      <circle cx="155" cy="26" r="2.2" fill="var(--ink)" opacity=".22"/>
-                      <circle cx="164" cy="33" r="1.6" fill="var(--ink)" opacity=".22"/>
-                      <circle cx="158" cy="34" r="1.2" fill="var(--ink)" opacity=".18"/>
-                    </g>
-                    <g class="eye">
-                      <ellipse cx="260" cy="30" rx="17" ry="10" fill="var(--cream)" stroke="var(--ink)" stroke-width="1.5"/>
-                      <g class="eye-iris">
-                        <circle cx="260" cy="30" r="5" fill="var(--cobalt)"/>
-                        <circle cx="260" cy="30" r="2" fill="var(--ink)"/>
-                      </g>
-                    </g>
-                  </svg>
-                </div>`:`<div class="card-butterfly-scene">
-                  <svg class="butterfly-anim" viewBox="0 0 320 60" preserveAspectRatio="xMidYMid meet">
-                    <defs>
-                      <path id="flight${p.id}" d="M -40 30 Q 60 8 120 34 T 240 26 T 360 30"/>
-                    </defs>
-                    <g class="twistor-lines">
-                      <path d="M0 50 Q 80 10 160 35 T 320 20" fill="none" stroke="var(--vermillion)" stroke-width="2.5" stroke-linecap="round" class="twistor t1"/>
-                      <path d="M0 15 Q 100 55 200 25 T 320 45" fill="none" stroke="var(--cobalt)" stroke-width="2" stroke-linecap="round" class="twistor t2"/>
-                      <path d="M0 38 Q 60 58 140 18 T 320 38" fill="none" stroke="var(--viridian)" stroke-width="2" stroke-linecap="round" class="twistor t3"/>
-                      <path d="M0 28 Q 90 2 180 42 T 320 22" fill="none" stroke="var(--saffron)" stroke-width="1.8" stroke-linecap="round" class="twistor t4"/>
-                      <path d="M0 48 Q 70 20 160 50 T 320 15" fill="none" stroke="var(--rose)" stroke-width="1.5" stroke-linecap="round" class="twistor t5"/>
-                    </g>
-                    <g class="butterfly-body">
-                      <animateMotion dur="6s" repeatCount="indefinite" rotate="auto"><mpath href="#flight${p.id}"/></animateMotion>
-                      <path d="M-6 0 Q-14 -12 -4 -14 Q 0 -8 0 0 Z" fill="var(--vermillion)" stroke="var(--ink)" stroke-width=".8" class="wing-l"/>
-                      <path d="M6 0 Q14 -12 4 -14 Q 0 -8 0 0 Z" fill="var(--cobalt)" stroke="var(--ink)" stroke-width=".8" class="wing-r"/>
-                      <path d="M-5 0 Q-10 8 -2 10 Q 0 5 0 0 Z" fill="var(--saffron)" stroke="var(--ink)" stroke-width=".8" class="wing-lb"/>
-                      <path d="M5 0 Q10 8 2 10 Q 0 5 0 0 Z" fill="var(--viridian)" stroke="var(--ink)" stroke-width=".8" class="wing-rb"/>
-                      <line x1="0" y1="0" x2="0" y2="-2" stroke="var(--ink)" stroke-width="1.2" stroke-linecap="round"/>
-                    </g>
-                  </svg>
-                </div>`):`<div class="card-a">${esc(p.answer.replace(/\n/g," ")).slice(0,80)}...</div>`}
-                <div class="card-tags">${p.tags.map(t=>`<span class="tag" onclick="event.stopPropagation();searchTag('${esc(t)}')">${esc(t)}</span>`).join("")}</div>
-              </div>
-              <div class="card-arrow">→</div>
-            </div>`;
-          }).join("")
-        }
-      </div>
-      <footer class="mono">发现的乐趣</footer>
-    `;
-  }
-
-  else if (state.showCompose) {
-    const isEdit = !!state.editId;
-    const editPost = isEdit ? state.posts.find(x=>x.id===state.editId) : null;
-    const dt = fmtDate(isEdit ? editPost.date : today);
-    app.innerHTML = `
-      <button class="btn-back" onclick="hideCompose()">← 返回</button>
-      <div class="compose-title">${isEdit ? "编辑问题" : "发布今日物理问题"}</div>
-      <div class="compose-card">
-        <div class="date-badge mono">${dt.full}</div>
-        <label class="field-label">选个图标</label>
-        <div class="emoji-row">
-          ${EMOJIS.map(e=>`<button class="emoji-btn ${state.newEmoji===e?"active":""}" onclick="pickEmoji('${e}')">${e}</button>`).join("")}
-        </div>
-        <label class="field-label">今日问题</label>
-        <textarea id="compQ" rows="3" placeholder="比如：为什么天空是蓝色的？" oninput="state.newQ=this.value;updatePublishBtn()">${esc(state.newQ)}</textarea>
-        <label class="field-label">答案 / 解释</label>
-        <textarea id="compA" rows="6" style="min-height:140px" placeholder="写下你的科普解答..." oninput="state.newA=this.value;updatePublishBtn()">${esc(state.newA)}</textarea>
-        <label class="field-label">标签（逗号分隔）</label>
-        <input type="text" placeholder="例：光学, 折射, 大气" value="${esc(state.newTags)}" oninput="state.newTags=this.value">
-        <button class="btn btn-publish" id="publishBtn" onclick="publish()">${isEdit ? "保存修改" : "发布问题"}</button>
-      </div>
-    `;
-    updatePublishBtn();
-  }
-
-  else if (state.view==="detail") {
-    const p = state.posts.find(x=>x.id===state.selectedId);
+  else if (state.view === "post") {
+    const p = POSTS.find(x=>x.id===state.id);
     if(!p){state.view="home";render();return;}
-    const dt=fmtDate(p.date);
     app.innerHTML = `
-      <button class="btn-back" onclick="openQuiz()">← 返回题库</button>
-      <article class="detail">
-        <div class="detail-date-row">
-          <span class="detail-emoji">${p.emoji}</span>
-          <span class="detail-date mono">${dt.full}</span>
-        </div>
-        <h2 class="detail-q">${esc(p.question)}</h2>
-        <div class="detail-div"></div>
-        ${p.hideAnswer?`<button class="btn-reveal" onclick="revealAnswer(this)">揭晓答案</button>`:""}
-        <div class="detail-a ${p.hideAnswer?"answer-hidden":""}">${nl2br(p.answer)}</div>
-        ${p.quizUrl?`<div style="margin-top:28px"><iframe src="${esc(p.quizUrl)}" style="width:100%;height:680px;border:none;border-radius:14px;background:#f5f4f0" loading="lazy" title="互动测验"></iframe></div>`:""}
-        <div class="detail-tags">${p.tags.map(t=>`<span class="tag-lg mono">${esc(t)}</span>`).join("")}</div>
-        <div class="detail-actions">
-          <button class="btn btn-like ${p.liked?"active":""}" onclick="toggleLike('${p.id}')">${p.liked?"♥ 已收藏":"♡ 收藏"}</button>
-          <button class="btn btn-edit" onclick="editPost('${p.id}')">✏ 编辑</button>
-          <button class="btn btn-delete" onclick="if(confirm('确定删除这条问题吗？'))deletePost('${p.id}')">删除此条</button>
-        </div>
+      <a class="back" href="#" onclick="goHome();return false">← 返回</a>
+      <article>
+        <h1 class="article-title">${esc(p.title)}</h1>
+        <div class="article-meta">${fmtDate(p.date)}</div>
+        <div class="article-body">${paras(p.body)}</div>
+        <div class="article-tags"><span class="label">标签</span>${p.tags.map(t=>esc(t)).join(" · ")}</div>
       </article>
-      <footer class="mono">每日问题 — 发现的乐趣</footer>
+      <footer>Physics Notes</footer>
     `;
   }
 }
 
-/* ── Actions ── */
-function showCompose(){state.showCompose=true;state.editId=null;render();window.scrollTo(0,0)}
-function hideCompose(){
-  state.showCompose=false;
-  if(state.editId){state.view="detail";state.editId=null;}
-  render();
-}
-function editPost(id){
-  const p=state.posts.find(x=>x.id===id);if(!p)return;
-  state.newQ=p.question;state.newA=p.answer;state.newTags=p.tags.join("，");state.newEmoji=p.emoji;
-  state.editId=id;state.showCompose=true;render();window.scrollTo(0,0);
-}
-function goHome(){state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
-function openQuiz(){state.view="quiz";state.selectedId=null;state.showCompose=false;render();window.scrollTo(0,0);logAnalytics("open_quiz",{})}
-function openPost(id){state.view="detail";state.selectedId=id;render();window.scrollTo(0,0);logAnalytics("open_post",{id})}
-function updateSearch(v){state.search=v;render();if(v&&v.length>=2)logAnalytics("search",{keyword_length:v.length})}
-function clearSearch(){state.search="";render()}
-function searchTag(t){state.search=t;state.view="home";state.selectedId=null;render();window.scrollTo(0,0)}
-function pickEmoji(e){
-  state.newEmoji=e;
-  document.querySelectorAll('.emoji-btn').forEach(btn=>{
-    btn.classList.toggle('active', btn.textContent.trim()===e);
-  });
-}
-function updatePublishBtn(){
-  const btn=document.getElementById("publishBtn");
-  if(btn) btn.disabled = (!state.newQ.trim()||!state.newA.trim());
-}
+function openPost(id){state.view="post";state.id=id;render();window.scrollTo(0,0);}
+function goHome(){state.view="home";state.id=null;render();window.scrollTo(0,0);}
 
-function publish(){
-  const qEl=document.getElementById("compQ");
-  const aEl=document.getElementById("compA");
-  if(qEl) state.newQ=qEl.value;
-  if(aEl) state.newA=aEl.value;
-  if(!state.newQ.trim()||!state.newA.trim())return;
-  if(state.editId){
-    const p=state.posts.find(x=>x.id===state.editId);
-    if(p){
-      p.question=state.newQ.trim();p.answer=state.newA.trim();
-      p.tags=state.newTags.split(/[,，、\s]+/).filter(Boolean);p.emoji=state.newEmoji||p.emoji;
-    }
-    logAnalytics("edit_question",{id:state.editId});
-    save();
-    const editedId=state.editId;
-    state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;state.editId=null;
-    state.view="detail";state.selectedId=editedId;
-    render();toast("已保存修改！");
-  } else {
-    state.posts.unshift({
-      id:"p"+Date.now(), date:todayStr(), question:state.newQ.trim(), answer:state.newA.trim(),
-      tags:state.newTags.split(/[,，、\s]+/).filter(Boolean), emoji:state.newEmoji||"🔬", liked:false
-    });
-    logAnalytics("publish_question", { has_tags: !!state.newTags.trim(), question_length: state.newQ.trim().length });
-    save();
-    state.newQ="";state.newA="";state.newTags="";state.newEmoji="🔬";state.showCompose=false;
-    state.view="quiz";
-    render();toast("发布成功！");
-  }
-}
-function toggleLike(id){
-  const p=state.posts.find(x=>x.id===id);if(p)p.liked=!p.liked;save();render();logAnalytics("toggle_like",{id});
-}
-function revealAnswer(btn){
-  const ans=btn.nextElementSibling;
-  ans.classList.add('revealed');
-  btn.style.display='none';
-}
-function deletePost(id){
-  state.posts=state.posts.filter(x=>x.id!==id);save();goHome();toast("已删除");logAnalytics("delete_post",{id});
-}
-
-/* ── Init ── */
-bootstrapData();
+render();
 </script>
 </body>
 </html>
